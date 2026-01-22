@@ -1,0 +1,155 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { createServerSupabaseClient } from "../../lib/supabase";
+
+const supabase = createServerSupabaseClient(Astro.cookies);
+
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+if (!session) return Astro.redirect("/login");
+
+let errorMsg = "";
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const intention = formData.get("intention")?.toString();
+  const description = formData.get("description")?.toString();
+  const date = formData.get("date")?.toString();
+  const time = formData.get("time")?.toString();
+
+  let scheduledAt = new Date().toISOString();
+  if (date && time) {
+    try {
+      scheduledAt = new Date(`${date}T${time}`).toISOString();
+    } catch {
+      // Invalid date/time format, use default
+    }
+  }
+
+  if (!intention) {
+    errorMsg = "Intencja jest wymagana.";
+  } else {
+    const { data, error } = await supabase
+      .from("field_circles")
+      .insert({
+        creator_id: session.user.id,
+        intention: intention,
+        description: description,
+        status: "scheduled",
+        scheduled_at: scheduledAt,
+        duration_minutes: 30,
+        created_at: new Date(),
+      })
+      .select()
+      .single();
+
+    if (error) errorMsg = "Błąd: " + error.message;
+    else return Astro.redirect(`/circles/${data.id}`);
+  }
+}
+---
+
+<Layout title="Stwórz Nowy Krąg">
+  <div class="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden bg-[#050511]">
+    <!-- Dekoracyjne światła w tle -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/30 rounded-full blur-[120px] pointer-events-none">
+    </div>
+    <div
+      class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fuchsia-600/30 rounded-full blur-[120px] pointer-events-none"
+    >
+    </div>
+
+    <!-- SZKLANA KARTA (Ciemniejsza dla kontrastu) -->
+    <div
+      class="max-w-lg w-full bg-black/40 backdrop-blur-2xl border border-white/10 p-10 rounded-3xl shadow-2xl relative z-10"
+    >
+      <div class="text-center mb-10">
+        <div
+          class="inline-block p-4 rounded-2xl bg-gradient-to-br from-indigo-500/30 to-purple-500/30 border border-white/10 mb-5 shadow-[0_0_20px_rgba(99,102,241,0.4)]"
+        >
+          <span class="text-4xl">🌱</span>
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Zasiej Intencję</h1>
+        <p class="text-indigo-200/70 font-light text-lg">Stwórz przestrzeń dla wspólnej energii.</p>
+      </div>
+
+      {
+        errorMsg && (
+          <div class="bg-red-500/20 border border-red-500/30 text-red-200 p-4 rounded-xl mb-6 text-sm text-center backdrop-blur-md">
+            ⚠️ {errorMsg}
+          </div>
+        )
+      }
+
+      <form method="POST" class="space-y-6">
+        <!-- Input: Intencja -->
+        <div class="group">
+          <label class="block text-xs uppercase font-bold mb-2 text-indigo-300 tracking-widest ml-1">Nazwa Kręgu</label>
+          <input
+            type="text"
+            name="intention"
+            required
+            class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white placeholder-white/30 focus:border-indigo-500 focus:bg-black/70 focus:ring-1 focus:ring-indigo-500 outline-none transition-all duration-300 shadow-inner"
+            placeholder="np. Uzdrawianie Relacji..."
+          />
+        </div>
+
+        <!-- Input: Opis -->
+        <div class="group">
+          <label class="block text-xs uppercase font-bold mb-2 text-indigo-300 tracking-widest ml-1">
+            Opis (Opcjonalnie)
+          </label>
+          <textarea
+            name="description"
+            rows="3"
+            class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-white placeholder-white/30 focus:border-indigo-500 focus:bg-black/70 focus:ring-1 focus:ring-indigo-500 outline-none transition-all duration-300 resize-none shadow-inner"
+            placeholder="Jaka jest intencja tego spotkania?"></textarea>
+        </div>
+
+        <!-- Sekcja Daty: Wyróżniona -->
+        <div class="bg-indigo-900/20 border border-indigo-500/20 p-5 rounded-2xl">
+          <div class="text-xs uppercase font-bold text-indigo-300 tracking-widest mb-4 ml-1 flex items-center gap-2">
+            <span>📅</span> Czas Spotkania
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] uppercase text-indigo-300/60 mb-1 ml-1">Dzień</label>
+              <input
+                type="date"
+                name="date"
+                required
+                class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-indigo-400 outline-none transition scheme-dark cursor-pointer hover:bg-black/60"
+              />
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase text-indigo-300/60 mb-1 ml-1">Godzina</label>
+              <input
+                type="time"
+                name="time"
+                required
+                class="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-indigo-400 outline-none transition scheme-dark cursor-pointer hover:bg-black/60"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 flex gap-4">
+          <a
+            href="/field-circles"
+            class="px-6 py-4 rounded-xl text-indigo-300 hover:text-white hover:bg-white/5 transition flex items-center justify-center font-medium"
+          >
+            Anuluj
+          </a>
+          <button
+            type="submit"
+            class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-[0_0_20px_-5px_rgba(99,102,241,0.5)] hover:shadow-[0_0_30px_-5px_rgba(99,102,241,0.7)] hover:-translate-y-1 border border-white/20"
+          >
+            ✨ Stwórz Krąg
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</Layout>

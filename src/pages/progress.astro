@@ -1,0 +1,713 @@
+---
+// src/pages/progress.astro
+import Layout from "../layouts/Layout.astro";
+import { createServerSupabaseClient } from "../lib/supabase";
+
+const supabase = createServerSupabaseClient(Astro.cookies);
+
+// Sprawdź autentykację
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+const user = session.user;
+
+// Pobierz wszystkie wpisy
+const { data: allEntries, count: totalEntries } = await supabase
+  .from("journal_entries")
+  .select("*", { count: "exact" })
+  .eq("user_id", user.id)
+  .order("created_at", { ascending: true });
+
+// Oblicz total days (od pierwszego wpisu)
+const totalDays =
+  allEntries && allEntries.length > 0
+    ? Math.ceil((new Date().getTime() - new Date(allEntries[0].created_at).getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
+
+// Oblicz longest streak
+let longestStreak = 0;
+let currentStreakCalc = 0;
+if (allEntries && allEntries.length > 0) {
+  const dates = allEntries.map((e) => {
+    const d = new Date(e.created_at);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  });
+
+  const uniqueDates = [...new Set(dates)].sort((a, b) => a - b);
+
+  currentStreakCalc = 1;
+  longestStreak = 1;
+
+  for (let i = 1; i < uniqueDates.length; i++) {
+    const dayDiff = (uniqueDates[i] - uniqueDates[i - 1]) / (1000 * 60 * 60 * 24);
+
+    if (dayDiff === 1) {
+      currentStreakCalc++;
+      longestStreak = Math.max(longestStreak, currentStreakCalc);
+    } else {
+      currentStreakCalc = 1;
+    }
+  }
+}
+
+// Pobierz ostatnie 90 dni dla heatmapy
+const ninetyDaysAgo = new Date();
+ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+const { data: recentEntries } = await supabase
+  .from("journal_entries")
+  .select("created_at, mood")
+  .eq("user_id", user.id)
+  .gte("created_at", ninetyDaysAgo.toISOString())
+  .order("created_at", { ascending: true });
+
+// Przygotuj dane dla heatmapy (ostatnie 90 dni)
+const heatmapData: Record<string, number> = {};
+for (let i = 89; i >= 0; i--) {
+  const date = new Date();
+  date.setDate(date.getDate() - i);
+  const dateStr = date.toISOString().split("T")[0];
+  heatmapData[dateStr] = 0;
+}
+
+recentEntries?.forEach((entry) => {
+  const dateStr = entry.created_at.split("T")[0];
+  if (heatmapData[dateStr] !== undefined) {
+    heatmapData[dateStr]++;
+  }
+});
+
+// Mood trends (ostatnie 30 dni)
+const thirtyDaysAgo = new Date();
+thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+const { data: monthEntries } = await supabase
+  .from("journal_entries")
+  .select("mood, created_at")
+  .eq("user_id", user.id)
+  .gte("created_at", thirtyDaysAgo.toISOString());
+
+const moodCounts: Record<string, number> = {};
+monthEntries?.forEach((entry) => {
+  moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+});
+
+// Transmutation count
+const { count: totalTransmutations } = await supabase
+  .from("transmutation_events")
+  .select("*", { count: "exact", head: true })
+  .eq("user_id", user.id);
+
+// Current Stage calculation (based on entries)
+const getCurrentStage = (entries: number) => {
+  if (entries < 10)
+    return {
+      name: "Nigredo",
+      emoji: "🌑",
+      color: "#4A5568",
+      description: "The Dark Night - Beginning of transformation",
+    };
+  if (entries < 30)
+    return {
+      name: "Albedo",
+      emoji: "🌙",
+      color: "#CBD5E0",
+      description: "The Whitening - Purification phase",
+    };
+  if (entries < 60)
+    return {
+      name: "Citrinitas",
+      emoji: "☀️",
+      color: "#F6AD55",
+      description: "The Yellowing - Dawn of awareness",
+    };
+  return {
+    name: "Rubedo",
+    emoji: "🔴",
+    color: "#FC8181",
+    description: "The Reddening - Full integration",
+  };
+};
+
+const currentStage = getCurrentStage(totalEntries || 0);
+---
+
+<Layout title="Progress - VERANIMA">
+  <div class="progress-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1>📊 Your Transformation Journey</h1>
+      <p class="subtitle">Track your liberation and growth</p>
+    </section>
+
+    <!-- Hero Stats -->
+    <section class="hero-stats">
+      <div class="hero-stat-card">
+        <div class="hero-stat-icon">📝</div>
+        <div class="hero-stat-value">{totalEntries || 0}</div>
+        <div class="hero-stat-label">Total Entries</div>
+      </div>
+
+      <div class="hero-stat-card">
+        <div class="hero-stat-icon">🔥</div>
+        <div class="hero-stat-value">{longestStreak}</div>
+        <div class="hero-stat-label">Longest Streak</div>
+      </div>
+
+      <div class="hero-stat-card">
+        <div class="hero-stat-icon">📅</div>
+        <div class="hero-stat-value">{totalDays}</div>
+        <div class="hero-stat-label">Total Days</div>
+      </div>
+
+      <div class="hero-stat-card">
+        <div class="hero-stat-icon">🐉</div>
+        <div class="hero-stat-value">{totalTransmutations || 0}</div>
+        <div class="hero-stat-label">Transmutations</div>
+      </div>
+    </section>
+
+    <!-- Current Stage -->
+    <section class="stage-section">
+      <h2>🎭 Current Alchemical Stage</h2>
+      <div class="stage-card" style={`border-left: 6px solid ${currentStage.color};`}>
+        <div class="stage-emoji">{currentStage.emoji}</div>
+        <div class="stage-content">
+          <h3 class="stage-name">{currentStage.name}</h3>
+          <p class="stage-description">{currentStage.description}</p>
+          <div class="stage-progress">
+            <div class="progress-bar-bg">
+              <div
+                class="progress-bar-fill"
+                style={`width: ${Math.min((((totalEntries || 0) % 30) / 30) * 100, 100)}%; background: ${currentStage.color};`}
+              >
+              </div>
+            </div>
+            <span class="progress-text">{(totalEntries || 0) % 30}/30 entries to next stage</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Streak Calendar (Heatmap) -->
+    <section class="calendar-section">
+      <h2>🔥 Streak Calendar (Last 90 Days)</h2>
+      <div class="calendar-grid">
+        {
+          Object.entries(heatmapData).map(([date, count]) => {
+            const intensity = count === 0 ? "empty" : count === 1 ? "low" : count === 2 ? "medium" : "high";
+
+            return (
+              <div
+                class={`calendar-cell ${intensity}`}
+                title={`${date}: ${count} ${count === 1 ? "entry" : "entries"}`}
+                data-date={date}
+              >
+                <span class="cell-count">{count > 0 ? count : ""}</span>
+              </div>
+            );
+          })
+        }
+      </div>
+      <div class="calendar-legend">
+        <span>Less</span>
+        <div class="legend-cell empty"></div>
+        <div class="legend-cell low"></div>
+        <div class="legend-cell medium"></div>
+        <div class="legend-cell high"></div>
+        <span>More</span>
+      </div>
+    </section>
+
+    <!-- Mood Trends -->
+    <section class="mood-trends-section">
+      <h2>🎭 Mood Distribution (Last 30 Days)</h2>
+      <div class="mood-chart-container">
+        {
+          Object.entries(moodCounts).length > 0 ? (
+            Object.entries(moodCounts).map(([mood, count]) => {
+              const percentage = ((count / (monthEntries?.length || 1)) * 100).toFixed(1);
+              const moodEmoji =
+                {
+                  happy: "😊",
+                  sad: "😢",
+                  angry: "😠",
+                  anxious: "😰",
+                  peaceful: "😌",
+                  grateful: "🙏",
+                }[mood] || "📝";
+
+              return (
+                <div class="mood-bar-item">
+                  <div class="mood-info">
+                    <span class="mood-emoji-large">{moodEmoji}</span>
+                    <span class="mood-name-cap">{mood}</span>
+                  </div>
+                  <div class="mood-bar-container">
+                    <div class="mood-bar-bg">
+                      <div class="mood-bar-fill-gradient" style={`width: ${percentage}%;`} />
+                    </div>
+                    <span class="mood-percentage">{percentage}%</span>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <p class="empty-state">No mood data for the last 30 days. Start journaling! 🌱</p>
+          )
+        }
+      </div>
+    </section>
+
+    <!-- Transformation Timeline -->
+    <section class="timeline-section">
+      <h2>⏳ Transformation Timeline</h2>
+      <div class="timeline">
+        {
+          allEntries && allEntries.length > 0 ? (
+            allEntries
+              .slice(-10)
+              .reverse()
+              .map((entry) => {
+                const date = new Date(entry.created_at);
+                const moodEmoji =
+                  {
+                    happy: "😊",
+                    sad: "😢",
+                    angry: "😠",
+                    anxious: "😰",
+                    peaceful: "😌",
+                    grateful: "🙏",
+                  }[entry.mood] || "📝";
+
+                return (
+                  <div class="timeline-item">
+                    <div class="timeline-dot" />
+                    <div class="timeline-content">
+                      <div class="timeline-header">
+                        <span class="timeline-emoji">{moodEmoji}</span>
+                        <span class="timeline-date">
+                          {date.toLocaleDateString("pl-PL", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
+                      </div>
+                      <p class="timeline-text">{entry.content.slice(0, 100)}...</p>
+                    </div>
+                  </div>
+                );
+              })
+          ) : (
+            <p class="empty-state">Your journey begins here. Write your first entry! 🌱</p>
+          )
+        }
+      </div>
+    </section>
+
+    <!-- Monthly Stats -->
+    <section class="monthly-stats-section">
+      <h2>📈 This Month's Overview</h2>
+      <div class="monthly-grid">
+        <div class="monthly-card">
+          <div class="monthly-icon">📝</div>
+          <div class="monthly-value">{monthEntries?.length || 0}</div>
+          <div class="monthly-label">Entries This Month</div>
+        </div>
+        <div class="monthly-card">
+          <div class="monthly-icon">🎯</div>
+          <div class="monthly-value">{(monthEntries?.length || 0) >= 20 ? "✅" : "⏳"}</div>
+          <div class="monthly-label">Monthly Goal (20)</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .progress-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: linear-gradient(180deg, #f7fafc 0%, #edf2f7 100%);
+    min-height: 100vh;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: #718096;
+    font-size: 1.2rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Hero Stats */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .hero-stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+  }
+
+  .hero-stat-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .hero-stat-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-stat-value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #667eea;
+    line-height: 1;
+  }
+
+  .hero-stat-label {
+    color: #718096;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Current Stage */
+  .stage-section {
+    margin-bottom: 3rem;
+  }
+
+  .stage-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .stage-emoji {
+    font-size: 4rem;
+  }
+
+  .stage-content {
+    flex: 1;
+  }
+
+  .stage-name {
+    font-size: 1.75rem;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+  }
+
+  .stage-description {
+    color: #718096;
+    margin-bottom: 1rem;
+  }
+
+  .stage-progress {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .progress-bar-bg {
+    flex: 1;
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 1rem;
+    transition: width 0.5s ease;
+  }
+
+  .progress-text {
+    font-size: 0.85rem;
+    color: #718096;
+    white-space: nowrap;
+  }
+
+  /* Calendar Heatmap */
+  .calendar-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 3rem;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(13, 1fr);
+    gap: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .calendar-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .calendar-cell:hover {
+    transform: scale(1.1);
+  }
+
+  .calendar-cell.empty {
+    background: #edf2f7;
+  }
+
+  .calendar-cell.low {
+    background: #c3dafe;
+    color: #2c5282;
+  }
+
+  .calendar-cell.medium {
+    background: #667eea;
+    color: white;
+  }
+
+  .calendar-cell.high {
+    background: #764ba2;
+    color: white;
+  }
+
+  .calendar-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #718096;
+    font-size: 0.85rem;
+  }
+
+  .legend-cell {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+  }
+
+  /* Mood Trends */
+  .mood-trends-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 3rem;
+  }
+
+  .mood-chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .mood-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .mood-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 150px;
+  }
+
+  .mood-emoji-large {
+    font-size: 2rem;
+  }
+
+  .mood-name-cap {
+    font-weight: 600;
+    color: #2d3748;
+    text-transform: capitalize;
+  }
+
+  .mood-bar-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .mood-bar-bg {
+    flex: 1;
+    height: 32px;
+    background: #f7fafc;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .mood-bar-fill-gradient {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 0.5rem;
+    transition: width 0.5s ease;
+  }
+
+  .mood-percentage {
+    font-weight: 600;
+    color: #2d3748;
+    min-width: 50px;
+  }
+
+  /* Timeline */
+  .timeline-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 3rem;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #667eea, #764ba2);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -2rem;
+    top: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #667eea;
+  }
+
+  .timeline-content {
+    background: #f7fafc;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+  }
+
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .timeline-emoji {
+    font-size: 1.5rem;
+  }
+
+  .timeline-date {
+    color: #718096;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .timeline-text {
+    color: #2d3748;
+    line-height: 1.6;
+  }
+
+  /* Monthly Stats */
+  .monthly-stats-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .monthly-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .monthly-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    color: white;
+  }
+
+  .monthly-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .monthly-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .monthly-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #a0aec0;
+  }
+
+  @media (max-width: 768px) {
+    .calendar-grid {
+      grid-template-columns: repeat(7, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,461 @@
+---
+// src/pages/insights.astro
+import Layout from "../layouts/Layout.astro";
+import { createServerSupabaseClient } from "../lib/supabase";
+
+const supabase = createServerSupabaseClient(Astro.cookies);
+
+// Sprawdź autentykację
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+const user = session.user;
+
+// Pobierz bieżący tydzień
+const today = new Date();
+const dayOfWeek = today.getDay();
+const startOfWeek = new Date(today);
+startOfWeek.setDate(today.getDate() - dayOfWeek);
+startOfWeek.setHours(0, 0, 0, 0);
+
+const endOfWeek = new Date(startOfWeek);
+endOfWeek.setDate(startOfWeek.getDate() + 6);
+endOfWeek.setHours(23, 59, 59, 999);
+
+// Pobierz wpisy z tego tygodnia
+const { data: weekEntries } = await supabase
+  .from("journal_entries")
+  .select("*")
+  .eq("user_id", user.id)
+  .gte("created_at", startOfWeek.toISOString())
+  .lte("created_at", endOfWeek.toISOString())
+  .order("created_at", { ascending: true });
+
+// Oblicz statystyki
+const totalEntries = weekEntries?.length || 0;
+
+const moodCounts =
+  weekEntries?.reduce(
+    (acc, entry) => {
+      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  ) || {};
+
+const dominantMood = Object.entries(moodCounts).sort((a, b) => (b[1] as number) - (a[1] as number))[0]?.[0];
+
+// Policz Dracarys tego tygodnia
+const { count: weekDracarys } = await supabase
+  .from("transmutation_events")
+  .select("*", { count: "exact", head: true })
+  .eq("user_id", user.id)
+  .gte("created_at", startOfWeek.toISOString())
+  .lte("created_at", endOfWeek.toISOString());
+
+// Pobierz poprzedni tydzień dla porównania
+const prevWeekStart = new Date(startOfWeek);
+prevWeekStart.setDate(startOfWeek.getDate() - 7);
+const prevWeekEnd = new Date(startOfWeek);
+prevWeekEnd.setDate(startOfWeek.getDate() - 1);
+
+const { count: prevWeekEntries } = await supabase
+  .from("journal_entries")
+  .select("*", { count: "exact", head: true })
+  .eq("user_id", user.id)
+  .gte("created_at", prevWeekStart.toISOString())
+  .lte("created_at", prevWeekEnd.toISOString());
+
+const entryChange = prevWeekEntries ? Math.round(((totalEntries - prevWeekEntries) / prevWeekEntries) * 100) : 0;
+
+// Mood emoji mapping
+const moodEmoji: Record<string, string> = {
+  happy: "😊",
+  sad: "😢",
+  angry: "😠",
+  anxious: "😰",
+  peaceful: "😌",
+  grateful: "🙏",
+};
+
+// Formatuj daty
+const weekLabel = `${startOfWeek.toLocaleDateString("pl-PL", { day: "numeric", month: "short" })} - ${endOfWeek.toLocaleDateString("pl-PL", { day: "numeric", month: "short" })}`;
+---
+
+<Layout title="Weekly Insights - VERANIMA">
+  <div class="insights-container">
+    <!-- Header -->
+    <header class="insights-header">
+      <div>
+        <h1>📊 Weekly Insights</h1>
+        <p class="week-label">{weekLabel}</p>
+      </div>
+      <button class="view-history-btn">View History</button>
+    </header>
+
+    <!-- Główne statystyki -->
+    <section class="stats-overview">
+      <div class="stat-card-large">
+        <div class="stat-icon">📝</div>
+        <div class="stat-content">
+          <div class="stat-value">{totalEntries}</div>
+          <div class="stat-label">Journal Entries</div>
+          {
+            entryChange !== 0 && (
+              <div class={`stat-change ${entryChange > 0 ? "positive" : "negative"}`}>
+                {entryChange > 0 ? "↑" : "↓"} {Math.abs(entryChange)}% vs last week
+              </div>
+            )
+          }
+        </div>
+      </div>
+
+      <div class="stat-card-large">
+        <div class="stat-icon">🐉</div>
+        <div class="stat-content">
+          <div class="stat-value">{weekDracarys || 0}</div>
+          <div class="stat-label">Dracarys Transmutations</div>
+        </div>
+      </div>
+
+      <div class="stat-card-large">
+        <div class="stat-icon">{dominantMood ? moodEmoji[dominantMood] : "😐"}</div>
+        <div class="stat-content">
+          <div class="stat-value">{dominantMood || "N/A"}</div>
+          <div class="stat-label">Dominant Mood</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mood Distribution -->
+    <section class="mood-section">
+      <h2>🎭 Mood Distribution</h2>
+      <div class="mood-chart">
+        {
+          Object.entries(moodCounts).map(([mood, count]) => {
+            const percentage = ((count as number) / totalEntries) * 100;
+            return (
+              <div class="mood-bar-container">
+                <div class="mood-label">
+                  <span class="mood-emoji">{moodEmoji[mood] || "😐"}</span>
+                  <span class="mood-name">{mood}</span>
+                </div>
+                <div class="mood-bar-wrapper">
+                  <div
+                    class="mood-bar"
+                    style={`width: ${percentage}%; background: linear-gradient(90deg, #667eea, #764ba2);`}
+                  />
+                  <span class="mood-count">{count}</span>
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    </section>
+
+    <!-- Daily Breakdown -->
+    <section class="daily-section">
+      <h2>📅 Daily Breakdown</h2>
+      <div class="daily-grid">
+        {
+          ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => {
+            const dayDate = new Date(startOfWeek);
+            dayDate.setDate(startOfWeek.getDate() + index);
+
+            const dayEntries =
+              weekEntries?.filter((entry) => {
+                const entryDate = new Date(entry.created_at);
+                return entryDate.toDateString() === dayDate.toDateString();
+              }) || [];
+
+            const hasEntries = dayEntries.length > 0;
+
+            return (
+              <div class={`day-card ${hasEntries ? "active" : ""}`}>
+                <div class="day-name">{day}</div>
+                <div class="day-date">{dayDate.getDate()}</div>
+                <div class="day-entries">
+                  {hasEntries ? `${dayEntries.length} ${dayEntries.length === 1 ? "entry" : "entries"}` : "No entries"}
+                </div>
+              </div>
+            );
+          })
+        }
+      </div>
+    </section>
+
+    <!-- AI Insights (placeholder) -->
+    <section class="ai-insights-section">
+      <h2>💡 AI Insights</h2>
+      <div class="insight-card">
+        <p class="insight-text">
+          {
+            totalEntries > 0
+              ? `This week you made ${totalEntries} journal ${totalEntries === 1 ? "entry" : "entries"}. ${
+                  dominantMood === "happy" || dominantMood === "peaceful" || dominantMood === "grateful"
+                    ? "You're showing positive emotional patterns - keep nurturing your well-being! 🌱"
+                    : dominantMood === "sad" || dominantMood === "angry" || dominantMood === "anxious"
+                      ? "You're experiencing challenging emotions. Remember, acknowledging them is the first step to transmutation. 💜"
+                      : "You're on a journey of self-discovery. Each entry brings you closer to your authentic self."
+                }`
+              : "Start journaling this week to unlock personalized insights about your emotional patterns and growth! 🌱"
+          }
+        </p>
+      </div>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .insights-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .insights-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+  }
+
+  .week-label {
+    color: #718096;
+    font-size: 1.1rem;
+  }
+
+  .view-history-btn {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .view-history-btn:hover {
+    background: #f7fafc;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Stats Overview */
+  .stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card-large {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 1rem;
+  }
+
+  .stat-icon {
+    font-size: 3rem;
+  }
+
+  .stat-content {
+    flex: 1;
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #667eea;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    color: #718096;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-change {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .stat-change.positive {
+    color: #48bb78;
+  }
+
+  .stat-change.negative {
+    color: #f56565;
+  }
+
+  /* Mood Section */
+  .mood-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  .mood-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mood-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .mood-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 120px;
+  }
+
+  .mood-emoji {
+    font-size: 1.5rem;
+  }
+
+  .mood-name {
+    font-weight: 600;
+    color: #2d3748;
+    text-transform: capitalize;
+  }
+
+  .mood-bar-wrapper {
+    flex: 1;
+    position: relative;
+    background: #f7fafc;
+    border-radius: 0.5rem;
+    height: 32px;
+    display: flex;
+    align-items: center;
+  }
+
+  .mood-bar {
+    height: 100%;
+    border-radius: 0.5rem;
+    transition: width 0.5s ease;
+  }
+
+  .mood-count {
+    position: absolute;
+    right: 0.75rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.9rem;
+  }
+
+  /* Daily Breakdown */
+  .daily-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  .daily-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.75rem;
+  }
+
+  .day-card {
+    background: #f7fafc;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .day-card.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .day-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .day-date {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .day-entries {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+
+  /* AI Insights */
+  .ai-insights-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .insight-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-left: 4px solid #667eea;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+  }
+
+  .insight-text {
+    color: #2d3748;
+    line-height: 1.7;
+    font-size: 1.05rem;
+  }
+
+  @media (max-width: 768px) {
+    .daily-grid {
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+
+    .day-card {
+      padding: 0.5rem;
+    }
+
+    .day-date {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+
+<script>
+  document.querySelector(".view-history-btn")?.addEventListener("click", () => {
+    // TODO: Navigate to insights history
+    alert("Insights history - coming soon!");
+  });
+</script>

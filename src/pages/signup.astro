@@ -1,0 +1,234 @@
+---
+// src/pages/signup.astro
+import Layout from "../layouts/Layout.astro";
+
+// Get env vars on server-side
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+---
+
+<Layout title="VERANIMA - Create Account">
+  <div class="signup-container">
+    <div class="signup-card">
+      <h1 class="logo">VERANIMA</h1>
+      <p class="tagline">Begin your liberation journey.</p>
+
+      <form id="signupForm" class="signup-form" data-supabase-url={supabaseUrl} data-supabase-key={supabaseAnonKey}>
+        <div class="input-group">
+          <label for="displayName">Display Name (optional)</label>
+          <input type="text" id="displayName" name="displayName" placeholder="Your name" />
+        </div>
+
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="your@email.com" required />
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required />
+        </div>
+
+        <div class="input-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required />
+        </div>
+
+        <button type="submit" class="btn-primary">Create Account</button>
+
+        <p class="login-link">
+          Already have an account? <a href="/login">Sign in</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .signup-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    padding: 2rem;
+  }
+
+  .signup-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 3rem;
+    max-width: 450px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .logo {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4c1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+
+  .tagline {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+
+  .signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .input-group label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .input-group input {
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .input-group input:focus {
+    outline: none;
+    border-color: #d4af37;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-primary {
+    padding: 1rem;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4c1 100%);
+    border: none;
+    border-radius: 10px;
+    color: #1a1a2e;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+  }
+
+  .login-link {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .login-link a {
+    color: #d4af37;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .login-link a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("signupForm");
+    const displayNameInput = document.getElementById("displayName");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirmPassword");
+
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const formElement = e.target;
+        if (!formElement) return;
+
+        const clientSupabaseUrl = formElement.dataset.supabaseUrl;
+        const clientSupabaseKey = formElement.dataset.supabaseKey;
+
+        const displayName = displayNameInput ? displayNameInput.value.trim() : "";
+        const email = emailInput ? emailInput.value.trim() : "";
+        const password = passwordInput ? passwordInput.value : "";
+        const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
+
+        // Validation
+        if (!email || !password || !confirmPassword) {
+          alert("Please fill in all required fields");
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          alert("Passwords do not match");
+          return;
+        }
+
+        if (password.length < 6) {
+          alert("Password must be at least 6 characters");
+          return;
+        }
+
+        if (!clientSupabaseUrl || !clientSupabaseKey) {
+          alert("Configuration error. Please contact support.");
+          return;
+        }
+
+        try {
+          const { createClient } = await import("@supabase/supabase-js");
+          const supabase = createClient(clientSupabaseUrl, clientSupabaseKey);
+
+          // Sign up the user
+          const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              data: {
+                display_name: displayName || email.split("@")[0],
+              },
+            },
+          });
+
+          if (error) {
+            alert("Signup failed: " + error.message);
+            return;
+          }
+
+          if (data.user) {
+            alert("Account created! Welcome to VERANIMA!");
+            window.location.href = "/user";
+          }
+        } catch {
+          // Handle error without console statement
+          alert("An unexpected error occurred. Please try again.");
+        }
+      });
+    }
+  });
+</script>

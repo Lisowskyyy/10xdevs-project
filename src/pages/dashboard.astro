@@ -1,0 +1,293 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { createServerSupabaseClient } from "../lib/supabase";
+
+const supabase = createServerSupabaseClient(Astro.cookies);
+
+// Get current user session
+const {
+  data: { session },
+  error: sessionError,
+} = await supabase.auth.getSession();
+
+if (!session || sessionError) {
+  return Astro.redirect("/login");
+}
+
+// Fetch user profile data
+const { data: profile, error: profileError } = await supabase
+  .from("user_profiles")
+  .select("*")
+  .eq("id", session.user.id)
+  .single();
+
+if (profileError) {
+  // Handle profile error gracefully
+  // Could redirect to error page or show default values
+}
+
+// Get stage info for display
+const stageInfo: Record<string, { name: string; color: string; emoji: string }> = {
+  nigredo: { name: "Nigredo", color: "from-gray-900 to-black", emoji: "🌑" },
+  albedo: { name: "Albedo", color: "from-gray-100 to-white", emoji: "🌕" },
+  citrinitas: { name: "Citrinitas", color: "from-yellow-500 to-amber-600", emoji: "☀️" },
+  rubedo: { name: "Rubedo", color: "from-red-500 to-rose-700", emoji: "🔥" },
+};
+
+const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo.nigredo;
+---
+
+<Layout title="Dashboard - VERANIMA">
+  <div class="dashboard-container">
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <!-- Welcome Section -->
+      <section class="welcome-section">
+        <div class="welcome-header">
+          <div>
+            <h2>Welcome back, {profile?.display_name || "Seeker"}</h2>
+            <p class="tagline">Continue your liberation journey.</p>
+          </div>
+          <a href="/profile" class="edit-profile-btn">Edit Profile</a>
+        </div>
+      </section>
+
+      <!-- Stats Cards -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-content">
+            <p class="stat-label">Current Streak</p>
+            <p class="stat-value">{profile?.streak_days || 0} days</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-content">
+            <p class="stat-label">Total Entries</p>
+            <p class="stat-value">{profile?.total_entries || 0}</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">{currentStage.emoji}</div>
+          <div class="stat-content">
+            <p class="stat-label">Current Stage</p>
+            <p class="stat-value">{currentStage.name}</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🌍</div>
+          <div class="stat-content">
+            <p class="stat-label">Field Circles</p>
+            <p class="stat-value">{profile?.total_circles || 0}</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feature Cards -->
+      <section class="features-grid">
+        <a href="/journal" class="feature-card">
+          <div class="feature-icon">📖</div>
+          <h3>Journal</h3>
+          <p>Write your thoughts and receive AI insights</p>
+        </a>
+
+        <a href="/dracarys" class="feature-card">
+          <div class="feature-icon">🔥</div>
+          <h3>Dracarys Mode</h3>
+          <p>Transform and release negative patterns</p>
+        </a>
+
+        <a href="/field-circles" class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h3>Field Circles</h3>
+          <p>Join global meditation sessions</p>
+        </a>
+
+        <a href="/progress" class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Progress</h3>
+          <p>Track your transformation journey</p>
+        </a>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .dashboard-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+  }
+
+  .dashboard-header {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 2rem;
+  }
+
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e5c3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .user-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .user-name {
+    font-weight: 500;
+  }
+
+  .btn-signout {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-signout:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dashboard-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  .welcome-section {
+    margin-bottom: 3rem;
+  }
+
+  .welcome-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .welcome-section h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .tagline {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .edit-profile-btn {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+
+  .edit-profile-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(212, 175, 55, 0.5);
+    transform: translateY(-2px);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .feature-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .feature-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(212, 175, 55, 0.5);
+    transform: translateY(-4px);
+  }
+
+  .feature-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+  }
+</style>

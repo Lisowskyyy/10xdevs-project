@@ -1,0 +1,189 @@
+---
+// src/pages/login.astro
+import "../styles/global.css";
+import { createServerSupabaseClient } from "../lib/supabase";
+
+// Handle form submission server-side
+if (Astro.request.method === "POST") {
+  const supabase = createServerSupabaseClient(Astro.cookies);
+  const formData = await Astro.request.formData();
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+
+  if (email && password) {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      // Handle error (you can pass this to the page)
+      console.error("Login error:", error.message);
+    } else if (data.user) {
+      // Successful login - redirect to dashboard
+      return Astro.redirect("/dashboard");
+    }
+  }
+}
+---
+
+<!doctype html>
+<html lang="pl" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>VERANIMA - Login</title>
+
+    <!-- Font: Outfit (Nowoczesny, czysty) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body
+    class="bg-[#03030b] text-slate-200 font-['Outfit',sans-serif] antialiased selection:bg-indigo-500/30 min-h-screen"
+  >
+    <div class="login-container">
+      <div class="login-card">
+        <h1 class="logo">VERANIMA</h1>
+        <p class="tagline">Breaker of Chains, your liberation begins.</p>
+
+        <form method="POST" class="login-form">
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" required />
+          </div>
+
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" required />
+          </div>
+
+          <button type="submit" class="btn-primary">Enter VERANIMA</button>
+
+          <p class="signup-link">
+            Don't have an account? <a href="/signup">Create one</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style>
+  /* ... twój istniejący CSS ... */
+  .login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+    padding: 2rem;
+  }
+
+  .login-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 3rem;
+    max-width: 450px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .logo {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4c1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 2px;
+  }
+
+  .tagline {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .input-group label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .input-group input {
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .input-group input:focus {
+    outline: none;
+    border-color: #d4af37;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .btn-primary {
+    padding: 1rem;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4c1 100%);
+    border: none;
+    border-radius: 10px;
+    color: #1a1a2e;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+  }
+
+  .signup-link {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .signup-link a {
+    color: #d4af37;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .signup-link a:hover {
+    text-decoration: underline;
+  }
+</style>

@@ -1,0 +1,562 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { createServerSupabaseClient } from "../lib/supabase";
+
+const supabase = createServerSupabaseClient(Astro.cookies);
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+const user = session.user;
+
+// --- HANDLE POST REQUESTS ---
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const action = formData.get("action")?.toString();
+
+  // Update profile
+  if (action === "update_profile") {
+    const firstName = formData.get("first_name")?.toString() || null;
+    const lastName = formData.get("last_name")?.toString() || null;
+
+    await supabase
+      .from("profiles")
+      .update({
+        first_name: firstName,
+        last_name: lastName,
+      })
+      .eq("id", user.id);
+
+    // Redirect to prevent form resubmission
+    return Astro.redirect("/profile");
+  }
+
+  // Delete meditation log
+  if (action === "delete_log") {
+    const logId = formData.get("log_id")?.toString();
+
+    if (logId) {
+      await supabase.from("meditation_logs").delete().eq("id", logId).eq("user_id", user.id);
+    }
+
+    // Redirect to prevent form resubmission
+    return Astro.redirect("/profile");
+  }
+}
+
+// --- FETCH DATA ---
+// Fetch user profile
+const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+
+// Fetch meditation logs
+const { data: logs } = await supabase
+  .from("meditation_logs")
+  .select(
+    `
+    id,
+    duration_minutes,
+    created_at,
+    field_circles (
+      intention
+    )
+  `
+  )
+  .eq("user_id", user.id)
+  .order("created_at", { ascending: false });
+
+const totalSessions = logs?.length || 0;
+const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0), 0) || 0;
+---
+
+<Layout title="Profile - VERANIMA">
+  <div class="profile-container">
+    <main class="profile-main">
+      <!-- Header Section with Edit Form -->
+      <section class="profile-header">
+        <div class="profile-header-content">
+          <!-- Avatar -->
+          <div class="profile-avatar">
+            <div class="avatar-wrapper">
+              {
+                user.user_metadata?.avatar_url ? (
+                  <img src={user.user_metadata.avatar_url} alt="Avatar" class="avatar-image" />
+                ) : (
+                  <div class="avatar-placeholder">🧘‍♂️</div>
+                )
+              }
+            </div>
+          </div>
+
+          <!-- Edit Profile Form -->
+          <div class="profile-form-section">
+            <h2 class="profile-title">Edit Profile</h2>
+
+            <form method="POST" class="profile-form">
+              <input type="hidden" name="action" value="update_profile" />
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="first_name" class="form-label">First Name</label>
+                  <input
+                    type="text"
+                    id="first_name"
+                    name="first_name"
+                    value={profile?.first_name || ""}
+                    placeholder="Enter your first name"
+                    class="form-input"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="last_name" class="form-label">Last Name</label>
+                  <input
+                    type="text"
+                    id="last_name"
+                    name="last_name"
+                    value={profile?.last_name || ""}
+                    placeholder="Enter your last name"
+                    class="form-input"
+                  />
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-save">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Statistics Section -->
+      <section class="stats-section">
+        <div class="stat-card">
+          <div class="stat-label">Total Sessions</div>
+          <div class="stat-value">{totalSessions}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Minutes</div>
+          <div class="stat-value">
+            {totalMinutes}<span class="stat-unit">min</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Meditation Logs Section -->
+      <section class="logs-section">
+        <div class="logs-header">
+          <h2 class="logs-title">Meditation History</h2>
+          <span class="logs-subtitle">Recent entries</span>
+        </div>
+
+        {
+          logs && logs.length > 0 ? (
+            <div class="logs-list">
+              {logs.map((log) => {
+                const fieldCircle = Array.isArray(log.field_circles) ? log.field_circles[0] : log.field_circles;
+                const intention = fieldCircle?.intention || "Private Session";
+
+                return (
+                  <div class="log-item">
+                    <div class="log-content">
+                      <div class="log-icon">🧘</div>
+                      <div class="log-details">
+                        <div class="log-intention">{intention}</div>
+                        <div class="log-date">
+                          {new Date(log.created_at).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}{" "}
+                          •{" "}
+                          {new Date(log.created_at).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="log-actions">
+                      <div class="log-duration">+{log.duration_minutes} min</div>
+
+                      <form
+                        method="POST"
+                        class="delete-form"
+                        onsubmit="return confirm('Are you sure you want to delete this entry?');"
+                      >
+                        <input type="hidden" name="action" value="delete_log" />
+                        <input type="hidden" name="log_id" value={log.id} />
+                        <button type="submit" class="btn-delete" title="Delete entry">
+                          🗑️
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div class="logs-empty">No meditation history yet. Start meditating to track your journey.</div>
+          )
+        }
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .profile-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+  }
+
+  .profile-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  /* Header Section */
+  .profile-header {
+    margin-bottom: 3rem;
+  }
+
+  .profile-header-content {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+
+  .profile-avatar {
+    flex-shrink: 0;
+  }
+
+  .avatar-wrapper {
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+
+  .avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #0a0a16;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+  }
+
+  .profile-form-section {
+    flex: 1;
+    width: 100%;
+  }
+
+  .profile-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: white;
+  }
+
+  .profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .form-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  .btn-save {
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-save:active {
+    transform: translateY(0);
+  }
+
+  /* Statistics Section */
+  .stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .stat-unit {
+    font-size: 1rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.5);
+    margin-left: 0.25rem;
+  }
+
+  /* Logs Section */
+  .logs-section {
+    background: rgba(10, 10, 22, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .logs-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logs-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .logs-subtitle {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .logs-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .log-item {
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.3s;
+  }
+
+  .log-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .log-item:last-child {
+    border-bottom: none;
+  }
+
+  .log-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+  }
+
+  .log-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: rgba(102, 126, 234, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .log-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .log-intention {
+    font-weight: 600;
+    color: white;
+    font-size: 1rem;
+  }
+
+  .log-date {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .log-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .log-duration {
+    color: rgba(102, 126, 234, 0.8);
+    font-family: monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .delete-form {
+    display: inline-block;
+  }
+
+  .btn-delete {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 0.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1rem;
+  }
+
+  .btn-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: rgba(239, 68, 68, 0.8);
+  }
+
+  .logs-empty {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .profile-header-content {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .profile-form-section {
+      width: 100%;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      justify-content: stretch;
+    }
+
+    .btn-save {
+      width: 100%;
+    }
+
+    .log-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .log-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+</style>

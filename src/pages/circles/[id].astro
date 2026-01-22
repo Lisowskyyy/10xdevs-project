@@ -1,0 +1,263 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { createServerSupabaseClient } from "../../lib/supabase";
+
+const supabase = createServerSupabaseClient(Astro.cookies);
+
+// Get session
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+// Get circle ID from params
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect("/field-circles");
+}
+
+// Fetch circle data
+const { data: circle, error: circleError } = await supabase.from("field_circles").select("*").eq("id", id).single();
+
+if (circleError || !circle) {
+  return Astro.redirect("/field-circles");
+}
+
+// Handle POST requests
+let message = "";
+let messageType: "success" | "error" = "success";
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const action = formData.get("action")?.toString();
+
+  if (action === "join") {
+    // Check if user already joined
+    const { data: existingParticipant } = await supabase
+      .from("session_participants")
+      .select("id")
+      .eq("circle_id", id)
+      .eq("user_id", session.user.id)
+      .single();
+
+    if (!existingParticipant) {
+      const { error } = await supabase.from("session_participants").insert({
+        circle_id: id,
+        user_id: session.user.id,
+        joined_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        message = "Błąd podczas dołączania: " + error.message;
+        messageType = "error";
+      } else {
+        message = "Dołączono do kręgu!";
+        messageType = "success";
+      }
+    }
+  } else if (action === "log_session") {
+    // Check if user already logged this session
+    const { data: existingLog } = await supabase
+      .from("meditation_logs")
+      .select("id")
+      .eq("circle_id", id)
+      .eq("user_id", session.user.id)
+      .single();
+
+    if (!existingLog) {
+      const { error } = await supabase.from("meditation_logs").insert({
+        circle_id: id,
+        user_id: session.user.id,
+        started_at: new Date().toISOString(),
+        duration_minutes: circle.duration_minutes || 30,
+      });
+
+      if (error) {
+        message = "Błąd podczas logowania sesji: " + error.message;
+        messageType = "error";
+      } else {
+        message = "Sesja zapisana!";
+        messageType = "success";
+      }
+    }
+  }
+}
+
+// Get RSVPs/participants
+const { data: rsvps } = await supabase.from("session_participants").select("id, user_id").eq("circle_id", id);
+
+// Check if current user has joined
+const { data: userParticipant } = await supabase
+  .from("session_participants")
+  .select("id")
+  .eq("circle_id", id)
+  .eq("user_id", session.user.id)
+  .single();
+
+const hasJoined = !!userParticipant;
+
+// Calculate circle status
+const now = new Date();
+const scheduledAt = new Date(circle.scheduled_at);
+const endTime = new Date(scheduledAt.getTime() + (circle.duration_minutes || 30) * 60 * 1000);
+
+const isUpcoming = scheduledAt > now;
+const isLive = scheduledAt <= now && endTime > now;
+const isFinished = endTime <= now || circle.status === "archived";
+
+const duration = circle.duration_minutes || 30;
+const startTime = scheduledAt;
+
+// Set default title if circle is not available
+const pageTitle = circle?.intention || "Krąg";
+---
+
+<Layout title={pageTitle}>
+  <div class="relative w-full min-h-screen overflow-hidden flex flex-col items-center justify-center font-sans">
+    <!-- TŁO: Kula (Cobe) -->
+    <!-- Zmniejszyłem opacity kuli do 0.5, żeby tekst na niej był czytelniejszy -->
+    <div class="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+      <canvas
+        id="cobe-canvas"
+        style="width: 800px; height: 800px; max-width: 100%; aspect-ratio: 1; opacity: 0.6;"
+        width="1600"
+        height="1600"></canvas>
+    </div>
+
+    <!-- UI: Unoszące się szkło -->
+    <div class="relative z-10 w-full max-w-4xl px-4 flex flex-col items-center mt-12 text-center">
+      <!-- Status Badge (Szklany) -->
+      <div class="mb-10">
+        {
+          isLive && (
+            <div class="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-green-500/10 backdrop-blur-md border border-green-500/30 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
+              <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500" />
+              </span>
+              <span class="font-bold tracking-widest text-sm text-green-400">LIVE TERAZ</span>
+            </div>
+          )
+        }
+        {
+          isUpcoming && (
+            <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-indigo-900/40 backdrop-blur-md border border-white/10 shadow-lg">
+              <span class="text-lg">⏳</span>
+              <div class="flex flex-col items-start text-xs text-left">
+                <span class="text-indigo-300 uppercase tracking-wider font-bold">Start</span>
+                <span class="text-white font-mono">
+                  {startTime.toLocaleString("pl-PL", { weekday: "short", hour: "2-digit", minute: "2-digit" })}
+                </span>
+              </div>
+            </div>
+          )
+        }
+      </div>
+
+      <!-- Tytuł (Duży i czysty) -->
+      <h1 class="text-6xl md:text-8xl font-bold mb-6 text-white drop-shadow-2xl tracking-tighter">
+        {circle.intention}
+      </h1>
+
+      <p class="text-indigo-100/70 text-xl max-w-2xl mb-16 font-light leading-relaxed drop-shadow-md">
+        {circle.description || "Przestrzeń wspólnej medytacji."}
+      </p>
+
+      <!-- GŁÓWNA KARTA AKCJI (Szkło) -->
+      <div
+        class="w-full max-w-md bg-white/[0.04] backdrop-blur-xl border border-white/10 p-8 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group hover:bg-white/[0.06] transition-all duration-500"
+      >
+        <!-- Subtelny gradient w tle karty -->
+        <div
+          class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"
+        >
+        </div>
+
+        <!-- Statystyki -->
+        <div class="flex justify-between items-center mb-8 px-4">
+          <div class="text-center">
+            <div class="text-[10px] uppercase tracking-[0.2em] text-indigo-300/60 mb-1">Czas</div>
+            <div class="text-3xl font-bold text-white font-mono">
+              {duration}<span class="text-sm text-white/40 ml-1">m</span>
+            </div>
+          </div>
+          <div class="h-10 w-px bg-white/10"></div>
+          <div class="text-center">
+            <div class="text-[10px] uppercase tracking-[0.2em] text-indigo-300/60 mb-1">Dusz</div>
+            <div class="text-3xl font-bold text-white font-mono">{rsvps?.length || 0}</div>
+          </div>
+        </div>
+
+        {
+          message && (
+            <div
+              class={`mb-6 p-4 rounded-xl text-sm backdrop-blur-md border ${messageType === "success" ? "bg-green-500/10 border-green-500/20 text-green-200" : "bg-red-500/10 border-red-500/20 text-red-200"}`}
+            >
+              {message}
+            </div>
+          )
+        }
+
+        <!-- Formularz Akcji -->
+        <form method="POST" class="flex flex-col gap-4">
+          {
+            !hasJoined && isUpcoming && (
+              <button
+                name="action"
+                value="join"
+                class="group/btn relative w-full py-4 rounded-xl bg-white text-indigo-950 font-bold text-lg overflow-hidden transition-all hover:scale-[1.02] shadow-lg"
+              >
+                <div class="absolute inset-0 bg-gradient-to-r from-indigo-100 to-white opacity-0 group-hover/btn:opacity-100 transition-opacity" />
+                <span class="relative flex items-center justify-center gap-2">Dołączam (RSVP) ✋</span>
+              </button>
+            )
+          }
+
+          {
+            hasJoined && isUpcoming && (
+              <div class="py-4 bg-indigo-500/10 rounded-xl border border-indigo-500/20 flex flex-col items-center justify-center gap-1">
+                <span class="text-indigo-300 font-medium text-sm flex items-center gap-2">
+                  <span class="h-2 w-2 rounded-full bg-indigo-400 animate-pulse" /> Jesteś na liście
+                </span>
+                <span class="text-white/60 text-xs font-mono">Czekamy na start...</span>
+              </div>
+            )
+          }
+
+          {
+            isLive && (
+              <button
+                name="action"
+                value="log_session"
+                class="w-full py-5 rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 bg-[length:200%_auto] animate-gradient text-white font-bold text-lg shadow-[0_0_40px_-10px_rgba(124,58,237,0.5)] hover:scale-[1.02] transition-transform border border-white/20"
+              >
+                <span class="flex items-center justify-center gap-3">
+                  <span class="text-2xl animate-bounce-slow">🧘‍♂️</span> Rozpocznij
+                </span>
+              </button>
+            )
+          }
+
+          {
+            isFinished && (
+              <div class="w-full py-4 rounded-xl bg-white/5 border border-white/5 text-gray-500 font-bold text-center">
+                Krąg Zakończony
+              </div>
+            )
+          }
+        </form>
+      </div>
+    </div>
+
+    <a
+      href="/field-circles"
+      class="fixed top-8 left-8 px-5 py-3 bg-white/[0.03] hover:bg-white/[0.1] backdrop-blur-xl rounded-full text-sm text-indigo-100 transition border border-white/10 flex items-center gap-2 group z-50 shadow-lg"
+    >
+      <span class="group-hover:-translate-x-1 transition-transform">←</span> Wróć
+    </a>
+  </div>
+</Layout>

@@ -1,0 +1,89 @@
+---
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="main-nav">
+  <div class="nav-container">
+    <a href="/dashboard" class="nav-logo">
+      <span class="logo-icon">💜</span>
+      <span class="logo-text">VERANIMA</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="/dashboard" class={currentPath === "/dashboard" ? "nav-link active" : "nav-link"}>🏠 Dashboard</a>
+      <a href="/journal" class={currentPath === "/journal" ? "nav-link active" : "nav-link"}>📝 Journal</a>
+      <a href="/field-circles" class={currentPath === "/field-circles" ? "nav-link active" : "nav-link"}>🌍 Circles</a>
+      <a href="/progress" class={currentPath === "/progress" ? "nav-link active" : "nav-link"}>📊 Progress</a>
+      <a href="/profile" class={currentPath === "/profile" ? "nav-link active" : "nav-link"}>👤 Profile</a>
+      <a href="/gratitude" class={currentPath === "/gratitude" ? "nav-link active" : "nav-link"}>💚 Wdzięczność</a>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .main-nav {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    font-size: 1.25rem;
+    transition: transform 0.2s;
+  }
+
+  .nav-logo:hover {
+    transform: scale(1.05);
+  }
+
+  .logo-icon {
+    font-size: 1.5rem;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+    font-weight: 500;
+  }
+
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  .nav-link.active {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none; /* Możesz później dodać hamburger menu */
+    }
+  }
+</style>

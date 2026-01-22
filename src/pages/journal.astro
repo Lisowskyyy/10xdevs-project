@@ -1,0 +1,266 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { createServerSupabaseClient } from "../lib/supabase";
+import AIInsightWrapper from "../components/AIInsightWrapper";
+
+const supabase = createServerSupabaseClient(Astro.cookies);
+
+// Pobierz aktualnego użytkownika
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+// Obsługa formularza
+let successMessage = "";
+let errorMessage = "";
+
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const content = formData.get("content")?.toString();
+  const mood = formData.get("mood")?.toString();
+
+  if (content && content.trim()) {
+    // Validate content length
+    if (content.trim().length < 3) {
+      errorMessage = "Wpis musi mieć co najmniej 3 znaki.";
+    } else if (content.trim().length > 2000) {
+      errorMessage = "Wpis nie może być dłuższy niż 2000 znaków.";
+    } else {
+      const { error } = await supabase.from("journal_entries").insert({
+        user_id: session.user.id,
+        content: content.trim(),
+        mood: mood || "neutral",
+      });
+
+      if (error) {
+        errorMessage = "Nie udało się zapisać wpisu. Spróbuj ponownie.";
+      } else {
+        successMessage = "Wpis zapisany! ✨";
+      }
+    }
+  } else {
+    errorMessage = "Proszę wpisać treść wpisu.";
+  }
+}
+
+// Pobierz wpisy użytkownika
+const { data: entries } = await supabase
+  .from("journal_entries")
+  .select("*")
+  .eq("user_id", session.user.id)
+  .order("created_at", { ascending: false })
+  .limit(10);
+
+const moods = [
+  { value: "joy", emoji: "😊", label: "Radość" },
+  { value: "calm", emoji: "😌", label: "Spokój" },
+  { value: "sadness", emoji: "😢", label: "Smutek" },
+  { value: "anger", emoji: "😠", label: "Złość" },
+  { value: "fear", emoji: "😰", label: "Lęk" },
+  { value: "neutral", emoji: "😐", label: "Neutralny" },
+];
+---
+
+<Layout title="Dziennik - VERANIMA">
+  <div class="journal-container min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <!-- Nagłówek -->
+    <header class="journal-header text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">Dziennik Emocji</h1>
+      <p class="text-gray-600">Zapisz swoje myśli i uczucia</p>
+    </header>
+
+    <!-- Komunikaty -->
+    {
+      successMessage && (
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">{successMessage}</div>
+      )
+    }
+
+    {
+      errorMessage && (
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">{errorMessage}</div>
+      )
+    }
+
+    <!-- Formularz dodawania wpisu -->
+    <div class="max-w-2xl mx-auto mb-8">
+      <form id="journal-form" method="POST" class="bg-white rounded-lg shadow-lg p-6">
+        <div class="mb-4">
+          <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
+            Jak się czujesz? Opisz swoje myśli i uczucia:
+          </label>
+          <textarea
+            id="content"
+            name="content"
+            rows="6"
+            maxlength="2000"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            placeholder="Napisz o swoim dniu, uczuciach, przemyśleniach..."
+            aria-describedby="content-help"
+            required></textarea>
+          <div id="content-help" class="text-sm text-gray-500 mt-1">
+            <span id="char-count">0</span>/2000 znaków
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Wybierz nastrój:</label>
+          <div class="grid grid-cols-3 gap-3">
+            {
+              moods.map((mood) => (
+                <label
+                  class="mood-option flex items-center justify-center p-3 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2"
+                  tabindex="0"
+                >
+                  <input
+                    type="radio"
+                    name="mood"
+                    value={mood.value}
+                    checked={mood.value === "neutral"}
+                    class="sr-only"
+                    aria-label={`Wybierz nastrój: ${mood.label}`}
+                  />
+                  <div class="text-center">
+                    <div class="text-2xl mb-1">{mood.emoji}</div>
+                    <div class="text-sm text-gray-600">{mood.label}</div>
+                  </div>
+                </label>
+              ))
+            }
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+        >
+          Zapisz wpis
+        </button>
+      </form>
+      <AIInsightWrapper client:visible formId="journal-form" />
+    </div>
+
+    <!-- Lista wpisów -->
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-6">Ostatnie wpisy</h2>
+
+      {
+        entries && entries.length > 0 ? (
+          <div class="space-y-4">
+            {entries.map((entry) => {
+              const moodData = moods.find((m) => m.value === entry.mood);
+              return (
+                <div class="bg-white rounded-lg shadow-md p-6">
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                      <span class="text-2xl" role="img" aria-label={`Nastrój: ${moodData?.label || "Neutralny"}`}>
+                        {moodData?.emoji || "😐"}
+                      </span>
+                      <time class="text-sm text-gray-500" datetime={entry.created_at}>
+                        {new Date(entry.created_at).toLocaleDateString("pl-PL", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </time>
+                    </div>
+                    <span class="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                      {moodData?.label || "Neutralny"}
+                    </span>
+                  </div>
+                  <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{entry.content}</p>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div class="text-center py-12">
+            <div class="text-6xl mb-4">📝</div>
+            <h3 class="text-xl text-gray-600 mb-2">Brak wpisów</h3>
+            <p class="text-gray-500">Zacznij pisać swój dziennik emocji!</p>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</Layout>
+
+<style>
+  /* Style dla aktywnego mood option */
+  .mood-option:has(input:checked) {
+    background-color: #eef2ff;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  .mood-option.active {
+    background-color: #eef2ff;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+</style>
+
+<script is:inline>
+  // Obsługa kliknięcia mood options i licznika znaków
+  document.addEventListener("DOMContentLoaded", function () {
+    const moodOptions = document.querySelectorAll(".mood-option");
+    const textarea = document.getElementById("content");
+    const charCount = document.getElementById("char-count");
+
+    // Obsługa licznika znaków
+    if (textarea && textarea.tagName === "TEXTAREA" && charCount) {
+      const textareaEl = textarea;
+      const updateCharCount = function () {
+        const count = textareaEl.value.length;
+        charCount.textContent = count.toString();
+
+        // Zmień kolor gdy zbliżamy się do limitu
+        if (count > 1800) {
+          charCount.classList.add("text-red-500");
+        } else if (count > 1500) {
+          charCount.classList.add("text-yellow-500");
+        } else {
+          charCount.classList.remove("text-red-500", "text-yellow-500");
+        }
+      };
+
+      textareaEl.addEventListener("input", updateCharCount);
+      updateCharCount(); // Inicjalizuj licznik
+    }
+
+    // Obsługa kliknięcia mood options
+    moodOptions.forEach((option) => {
+      option.addEventListener("click", function (event) {
+        const target = event.currentTarget;
+        if (!target || !(target instanceof HTMLElement)) return;
+
+        // Usuń aktywną klasę ze wszystkich
+        moodOptions.forEach((opt) => opt.classList.remove("active"));
+
+        // Dodaj aktywną klasę do klikniętego
+        target.classList.add("active");
+
+        // Zaznacz radio input
+        const radio = target.querySelector('input[type="radio"]');
+        if (radio && radio instanceof HTMLInputElement) {
+          radio.checked = true;
+        }
+      });
+    });
+
+    // Ustaw active na domyślnie zaznaczonym
+    const checkedOption = document.querySelector('.mood-option input[type="radio"]:checked');
+    if (checkedOption) {
+      const closestOption = checkedOption.closest(".mood-option");
+      if (closestOption) {
+        closestOption.classList.add("active");
+      }
+    }
+  });
+</script>
