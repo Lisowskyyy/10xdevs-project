@@ -45,7 +45,7 @@ const { data: entries } = await supabase
         >
           Ścieżka Wdzięczności
         </h1>
-        <p class="text-slate-400 max-w-lg mx-auto">
+        <p class="text-slate-300 max-w-lg mx-auto">
           Tutaj gromadzą się Twoje promienie światła. Każdy wpis to krok ku wewnętrznej harmonii.
         </p>
       </header>
@@ -62,7 +62,7 @@ const { data: entries } = await supabase
                       "{entry.content}"
                     </p>
                   </div>
-                  <div class="text-xs text-slate-500 font-mono whitespace-nowrap opacity-60">
+                  <div class="text-xs text-slate-300 font-mono whitespace-nowrap opacity-80">
                     {new Date(entry.created_at).toLocaleDateString("pl-PL", {
                       weekday: "long",
                       year: "numeric",
@@ -78,10 +78,10 @@ const { data: entries } = await supabase
                       <div class="flex gap-3 items-start">
                         <div class="text-2xl">✨</div>
                         <div class="flex-1">
-                          <span class="text-xs font-bold text-purple-300 uppercase tracking-widest block mb-2">
+                          <span class="text-xs font-bold text-purple-200 uppercase tracking-widest block mb-2">
                             Głos Veranimy
                           </span>
-                          <p class="text-purple-100/90 text-sm md:text-base leading-relaxed">{entry.ai_response}</p>
+                          <p class="text-white text-sm md:text-base leading-relaxed">{entry.ai_response}</p>
                         </div>
                       </div>
                     </div>
@@ -101,14 +101,13 @@ const { data: entries } = await supabase
               >
                 Twoja księga jest jeszcze pusta
               </h2>
-              <p class="text-slate-400 mb-8 max-w-md mx-auto leading-relaxed">
+              <p class="text-slate-300 mb-8 max-w-md mx-auto leading-relaxed">
                 Każda podróż zaczyna się od pierwszego kroku. Zapisz swój pierwszy promień wdzięczności i pozwól, aby
                 światło zaczęło świecić.
               </p>
               <a
                 href="/dashboard"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-all duration-300 hover:scale-105 hover:border-[#d4af37]/60 hover:bg-white/15 backdrop-blur-sm"
-                style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(212, 175, 55, 0.3);"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all duration-300 hover:scale-105 backdrop-blur-sm bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-900 hover:shadow-[0_0_20px_rgba(251,191,36,0.4)]"
               >
                 <span>Zapisz pierwszy wpis</span>
                 <span class="text-lg">→</span>
