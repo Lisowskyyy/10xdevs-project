@@ -1,20 +1,11 @@
 ---
-// ============================================================================
-// GRATITUDE.ASTRO - Dziennik Wdzięczności
-// ============================================================================
-// VERANIMA - Aplikacja Transformacji Świadomości
-// Data utworzenia: 31 października 2025
-// ============================================================================
-
+// src/pages/gratitude.astro
 import Layout from "../layouts/Layout.astro";
-
-// Import klienta Supabase
 import { createServerSupabaseClient } from "../lib/supabase";
 
-export const prerender = false;
-
-// Sprawdzenie autoryzacji (SSR)
 const supabase = createServerSupabaseClient(Astro.cookies);
+
+// Pobierz aktualnego użytkownika
 const {
   data: { session },
 } = await supabase.auth.getSession();
@@ -22,459 +13,72 @@ const {
 if (!session) {
   return Astro.redirect("/login");
 }
+
+// Pobieranie Historii Wdzięczności z Bazy
+// Sortujemy malejąco (najnowsze na górze)
+const { data: entries } = await supabase
+  .from("gratitude_entries")
+  .select("*")
+  .eq("user_id", session.user.id)
+  .order("created_at", { ascending: false });
 ---
 
-<Layout title="Dziennik Wdzięczności - VERANIMA">
-  <main class="gratitude-container">
-    <!-- Header -->
-    <header class="gratitude-header">
-      <h1>💚 Dziennik Wdzięczności</h1>
-      <p class="subtitle">Kultywuj wdzięczność, przyciągaj obfitość</p>
-    </header>
+<Layout title="Dziennik Wdzięczności | Veranima">
+  <main class="min-h-screen bg-slate-950 text-slate-200 py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+      <!-- Nagłówek -->
+      <header class="mb-12 text-center">
+        <h1 class="text-4xl font-serif text-gold mb-4">Ścieżka Wdzięczności</h1>
+        <p class="text-slate-400 max-w-lg mx-auto">
+          Tutaj gromadzą się Twoje promienie światła. Każdy wpis to krok ku wewnętrznej harmonii.
+        </p>
+      </header>
 
-    <!-- Form Card -->
-    <section class="gratitude-card">
-      <h2>Za co dzisiaj jesteś wdzięczny/wdzięczna?</h2>
+      <!-- Lista Wpisów -->
+      <div class="space-y-8">
+        {
+          entries && entries.length > 0 ? (
+            entries.map((entry) => (
+              <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 hover:border-gold/30 transition-colors duration-300">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                  <div class="flex-1">
+                    <p class="text-lg text-slate-200 font-light italic">"{entry.content}"</p>
+                  </div>
+                  <div class="text-xs text-slate-500 font-mono whitespace-nowrap">
+                    {new Date(entry.created_at).toLocaleDateString("pl-PL", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </div>
+                </div>
 
-      <form id="gratitude-form" class="gratitude-form">
-        <!-- Pole tekstowe -->
-        <div class="form-group">
-          <label for="gratitude-text">
-            Twoja wdzięczność
-            <span class="required">*</span>
-          </label>
-          <textarea
-            id="gratitude-text"
-            name="gratitude_text"
-            placeholder="Jestem wdzięczny/wdzięczna za..."
-            required
-            rows="5"></textarea>
-          <div class="char-counter">
-            <span id="char-count">0</span> / 1000 znaków
-          </div>
-        </div>
-
-        <!-- Kategoria -->
-        <div class="form-group">
-          <label for="category">Kategoria</label>
-          <select id="category" name="category" class="category-select">
-            <option value="other">Inne</option>
-            <option value="health">🌿 Zdrowie</option>
-            <option value="relationships">💞 Relacje</option>
-            <option value="abundance">✨ Obfitość i Finanse</option>
-            <option value="personal_growth">🌱 Rozwój Osobisty</option>
-            <option value="nature">🌍 Natura i Piękno Świata</option>
-          </select>
-        </div>
-
-        <!-- Emocja -->
-        <div class="form-group">
-          <label>Jaką emocję czujesz?</label>
-          <div class="emotion-grid">
-            <button type="button" class="emotion-btn" data-emotion="gratitude">🙏 Wdzięczność</button>
-            <button type="button" class="emotion-btn" data-emotion="joy">😊 Radość</button>
-            <button type="button" class="emotion-btn" data-emotion="peace">☮️ Spokój</button>
-            <button type="button" class="emotion-btn" data-emotion="love">💖 Miłość</button>
-            <button type="button" class="emotion-btn" data-emotion="hope">🌟 Nadzieja</button>
-            <button type="button" class="emotion-btn" data-emotion="calm">🧘 Ukojenie</button>
-          </div>
-          <input type="hidden" id="selected-emotion" name="emotion" value="" />
-        </div>
-
-        <!-- Submit Button -->
-        <button type="submit" class="submit-btn" id="submit-btn">
-          <span class="btn-text">💚 Zapisz Wdzięczność</span>
-          <span class="btn-loading" style="display: none;">
-            <span class="spinner"></span> Zapisuję...
-          </span>
-        </button>
-      </form>
-
-      <!-- Success Message -->
-      <div id="success-message" class="success-message" style="display: none;">
-        <span class="success-icon">✨</span>
-        <p>Twoja wdzięczność została zapisana!</p>
+                {entry.ai_response && (
+                  <div class="mt-4 pt-4 border-t border-slate-800/50">
+                    <div class="flex gap-3 items-start">
+                      <div class="text-xl">✨</div>
+                      <div>
+                        <span class="text-xs font-bold text-purple-400 uppercase tracking-widest block mb-1">
+                          Głos Veranimy
+                        </span>
+                        <p class="text-purple-200/90 text-sm leading-relaxed">{entry.ai_response}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div class="text-center py-20 bg-slate-900/30 rounded-xl border border-dashed border-slate-800">
+              <p class="text-slate-500 mb-4">Twoja księga jest jeszcze pusta.</p>
+              <a href="/dashboard" class="text-gold hover:text-gold/80 underline underline-offset-4">
+                Dodaj pierwszy promień na Dashboardzie &rarr;
+              </a>
+            </div>
+          )
+        }
       </div>
-
-      <!-- Error Message -->
-      <div id="error-message" class="error-message" style="display: none;">
-        <span class="error-icon">⚠️</span>
-        <p id="error-text"></p>
-      </div>
-    </section>
-
-    <!-- Gratitude History -->
-    <section class="gratitude-history">
-      <h2>📖 Twoje Wdzięczności</h2>
-      <div id="gratitude-list" class="gratitude-list">
-        <div class="loading">Ładowanie...</div>
-      </div>
-    </section>
+    </div>
   </main>
 </Layout>
-
-<style>
-  /* ============================================================================
-     STYLES - Dziennik Wdzięczności
-     ============================================================================ */
-
-  .gratitude-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    min-height: calc(100vh - 80px);
-  }
-
-  /* Header */
-  .gratitude-header {
-    text-align: center;
-    margin-bottom: 40px;
-    animation: fadeIn 0.6s ease-in;
-  }
-
-  .gratitude-header h1 {
-    font-size: 2.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 10px;
-  }
-
-  .subtitle {
-    font-size: 1.1rem;
-    color: #666;
-    font-style: italic;
-  }
-
-  /* Card */
-  .gratitude-card {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    margin-bottom: 40px;
-    animation: slideUp 0.6s ease-out;
-  }
-
-  .gratitude-card h2 {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 25px;
-  }
-
-  /* Form */
-  .gratitude-form {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .form-group label {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 8px;
-    font-size: 1rem;
-  }
-
-  .required {
-    color: #e74c3c;
-  }
-
-  /* Textarea */
-  textarea {
-    width: 100%;
-    padding: 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-family: inherit;
-    resize: vertical;
-    transition: border-color 0.3s ease;
-  }
-
-  textarea:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-
-  .char-counter {
-    text-align: right;
-    font-size: 0.85rem;
-    color: #999;
-    margin-top: 5px;
-  }
-
-  /* Select */
-  .category-select {
-    padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-family: inherit;
-    cursor: pointer;
-    transition: border-color 0.3s ease;
-    background: white;
-  }
-
-  .category-select:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-
-  /* Emotion Grid */
-  .emotion-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-top: 8px;
-  }
-
-  .emotion-btn {
-    padding: 12px 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    background: white;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 500;
-  }
-
-  .emotion-btn:hover {
-    border-color: #667eea;
-    background: rgba(102, 126, 234, 0.05);
-    transform: translateY(-2px);
-  }
-
-  .emotion-btn.selected {
-    border-color: #667eea;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  }
-
-  /* Submit Button */
-  .submit-btn {
-    padding: 16px 32px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .submit-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  .submit-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .btn-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  /* Spinner */
-  .spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  /* Messages */
-  .success-message,
-  .error-message {
-    padding: 16px 20px;
-    border-radius: 12px;
-    margin-top: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    animation: slideDown 0.4s ease-out;
-  }
-
-  .success-message {
-    background: #d4edda;
-    border: 2px solid #c3e6cb;
-    color: #155724;
-  }
-
-  .error-message {
-    background: #f8d7da;
-    border: 2px solid #f5c6cb;
-    color: #721c24;
-  }
-
-  .success-icon,
-  .error-icon {
-    font-size: 1.5rem;
-  }
-
-  /* Gratitude History */
-  .gratitude-history {
-    margin-top: 60px;
-  }
-
-  .gratitude-history h2 {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 30px;
-    text-align: center;
-  }
-
-  .gratitude-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .gratitude-item {
-    background: white;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    animation: fadeIn 0.4s ease-in;
-  }
-
-  .gratitude-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-
-  .gratitude-category {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-
-  .gratitude-date {
-    font-size: 0.85rem;
-    color: #999;
-  }
-
-  .gratitude-text {
-    font-size: 1.05rem;
-    color: #333;
-    line-height: 1.6;
-    margin-bottom: 12px;
-  }
-
-  .gratitude-emotion {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: rgba(102, 126, 234, 0.1);
-    border-radius: 20px;
-    font-size: 0.9rem;
-    color: #667eea;
-    font-weight: 500;
-  }
-
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: #999;
-    font-size: 1.1rem;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #999;
-  }
-
-  .empty-state-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-  }
-
-  /* Animations */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .gratitude-container {
-      padding: 15px;
-    }
-
-    .gratitude-header h1 {
-      font-size: 2rem;
-    }
-
-    .gratitude-card {
-      padding: 20px;
-    }
-
-    .emotion-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-</style>
-
-<script>
-  import "../lib/gratitude-client.ts";
-</script>
