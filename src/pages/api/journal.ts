@@ -65,7 +65,7 @@ export const POST: APIRoute = async ({ request }) => {
         user_id: userId,
         gratitude_text: text,
         ai_response: aiResponse,
-        mood: "Reflective", // Uproszczone, bo AI teraz pisze opisowo
+        mood: "Reflective",
       },
     ]);
 
