@@ -62,69 +62,72 @@ const { data: burnedEntries } = await supabase
     <header class="dracarys-header">
       <div class="header-content">
         <a href="/dashboard" class="back-link">← Dashboard</a>
-        <h1>🔥 Dracarys Mode 🔥</h1>
+        <h1 class="page-title">Dracarys</h1>
       </div>
     </header>
 
     <main class="dracarys-main">
-      <!-- Intro -->
-      <section class="intro-section">
-        <h2>Spal to, co Cię ogranicza</h2>
-        <p class="subtitle">
-          Zapisz negatywną myśl, przekonanie lub emocję. Następnie zamień ją w coś pozytywnego poprzez transmutację.
-        </p>
-      </section>
+      <!-- Main Ritual Card -->
+      <div class="ritual-card">
+        <!-- Intro -->
+        <section class="intro-section">
+          <h2>Spal to, co Cię ogranicza</h2>
+          <p class="subtitle">
+            Zapisz negatywną myśl, przekonanie lub emocję. Następnie zamień ją w coś pozytywnego poprzez transmutację.
+          </p>
+        </section>
 
-      <!-- Komunikaty -->
-      {burnMessage && <div class="alert alert-success">{burnMessage}</div>}
-      {errorMessage && <div class="alert alert-error">{errorMessage}</div>}
+        <!-- Komunikaty -->
+        {burnMessage && <div class="alert alert-success">{burnMessage}</div>}
+        {errorMessage && <div class="alert alert-error">{errorMessage}</div>}
 
-      <!-- Formularz spalania -->
-      <section class="burn-section">
-        <form method="POST" class="burn-form" id="burnForm">
-          <!-- Co spalić -->
-          <div class="form-group">
-            <label for="content">Co chcesz spalić?</label>
-            <textarea
-              id="content"
-              name="content"
-              rows="4"
-              maxlength="500"
-              placeholder="Np. Strach przed porażką, poczucie małości, złość na siebie..."
-              required></textarea>
-            <div class="char-counter">
-              <span id="char-count">0</span>/500 znaków
+        <!-- Formularz spalania -->
+        <section class="burn-section">
+          <form method="POST" class="burn-form" id="burnForm">
+            <!-- Co spalić -->
+            <div class="form-group">
+              <label for="content">Co chcesz spalić?</label>
+              <textarea
+                id="content"
+                name="content"
+                rows="4"
+                maxlength="500"
+                placeholder="Np. Strach przed porażką, poczucie małości, złość na siebie..."
+                required></textarea>
+              <div class="char-counter">
+                <span id="char-count">0</span>/500 znaków
+              </div>
+            </div>
+
+            <!-- Na co transmutować -->
+            <div class="form-group">
+              <label for="transmutation">Na co to transmutujesz? (opcjonalne)</label>
+              <textarea
+                id="transmutation"
+                name="transmutation"
+                rows="3"
+                maxlength="500"
+                placeholder="Np. Odwaga do działania, pewność siebie, miłość do siebie..."></textarea>
+            </div>
+
+            <!-- Button z animacją -->
+            <button type="submit" class="btn-burn" id="burnButton">
+              <span class="btn-text">🔥 SPAL TO! 🔥</span>
+            </button>
+          </form>
+
+          <!-- Fire Animation Container -->
+          <div class="fire-container" id="fireContainer">
+            <div class="fire">
+              <div class="flame"></div>
+              <div class="flame"></div>
+              <div class="flame"></div>
+              <div class="flame"></div>
+              <div class="flame"></div>
             </div>
           </div>
-
-          <!-- Na co transmutować -->
-          <div class="form-group">
-            <label for="transmutation">Na co to transmutujesz? (opcjonalne)</label>
-            <textarea
-              id="transmutation"
-              name="transmutation"
-              rows="3"
-              maxlength="500"
-              placeholder="Np. Odwaga do działania, pewność siebie, miłość do siebie..."></textarea>
-          </div>
-
-          <!-- Button z animacją -->
-          <button type="submit" class="btn-burn" id="burnButton">
-            <span class="btn-text">🔥 SPAL TO! 🔥</span>
-          </button>
-        </form>
-
-        <!-- Fire Animation Container -->
-        <div class="fire-container" id="fireContainer">
-          <div class="fire">
-            <div class="flame"></div>
-            <div class="flame"></div>
-            <div class="flame"></div>
-            <div class="flame"></div>
-            <div class="flame"></div>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <!-- Spalone wpisy -->
       <section class="burned-section">
@@ -173,14 +176,35 @@ const { data: burnedEntries } = await supabase
 <style>
   .dracarys-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a0000 0%, #330000 50%, #1a0000 100%);
+    background-image: url("/dracarys.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: white;
+    position: relative;
+  }
+
+  .dracarys-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(2, 6, 23, 0.8);
+    z-index: 0;
+  }
+
+  .dracarys-container > * {
+    position: relative;
+    z-index: 1;
   }
 
   .dracarys-header {
     backdrop-filter: blur(10px);
-    background: rgba(255, 50, 0, 0.1);
-    border-bottom: 1px solid rgba(255, 100, 0, 0.3);
+    background: rgba(15, 23, 42, 0.5);
+    border-bottom: 1px solid rgba(220, 38, 38, 0.2);
     padding: 1.5rem 2rem;
   }
 
@@ -193,7 +217,7 @@ const { data: burnedEntries } = await supabase
   }
 
   .back-link {
-    color: #ff6b35;
+    color: #fb923c;
     text-decoration: none;
     font-weight: 500;
     transition: opacity 0.3s;
@@ -203,18 +227,31 @@ const { data: burnedEntries } = await supabase
     opacity: 0.8;
   }
 
-  .dracarys-header h1 {
-    font-size: 1.5rem;
+  .page-title {
+    font-size: 2.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    font-family: "Georgia", "Times New Roman", serif;
+    background: linear-gradient(to right, #fb923c, #ef4444, #eab308);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
   }
 
   .dracarys-main {
     max-width: 900px;
     margin: 0 auto;
     padding: 3rem 2rem;
+  }
+
+  .ritual-card {
+    backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.2);
+    margin-bottom: 3rem;
   }
 
   .intro-section {
@@ -226,10 +263,11 @@ const { data: burnedEntries } = await supabase
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    color: rgb(226, 232, 240);
   }
 
   .subtitle {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgb(226, 232, 240);
     line-height: 1.6;
   }
 
@@ -255,15 +293,12 @@ const { data: burnedEntries } = await supabase
 
   .burn-section {
     position: relative;
-    margin-bottom: 4rem;
   }
 
   .burn-form {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 100, 0, 0.2);
-    border-radius: 1rem;
-    padding: 2rem;
+    background: transparent;
+    border: none;
+    padding: 0;
   }
 
   .form-group {
@@ -274,14 +309,14 @@ const { data: burnedEntries } = await supabase
     display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgb(226, 232, 240);
   }
 
   .form-group textarea {
     width: 100%;
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 100, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(127, 29, 29, 0.3);
     border-radius: 0.75rem;
     color: white;
     font-size: 1rem;
@@ -292,8 +327,8 @@ const { data: burnedEntries } = await supabase
 
   .form-group textarea:focus {
     outline: none;
-    border-color: #ff6b35;
-    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(220, 38, 38, 0.5);
+    background: rgba(0, 0, 0, 0.5);
   }
 
   .form-group textarea::placeholder {
@@ -310,25 +345,28 @@ const { data: burnedEntries } = await supabase
   .btn-burn {
     width: 100%;
     padding: 1.25rem;
-    background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+    background: linear-gradient(to right, #dc2626, #ea580c);
     border: none;
     border-radius: 0.75rem;
     color: white;
     font-size: 1.25rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
   }
 
   .btn-burn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+    transform: scale(1.02);
+    box-shadow:
+      0 8px 25px rgba(220, 38, 38, 0.5),
+      0 0 20px rgba(220, 38, 38, 0.3);
   }
 
   .btn-burn:active {
-    transform: translateY(0);
+    transform: scale(0.98);
   }
 
   /* Fire Animation */
@@ -415,10 +453,20 @@ const { data: burnedEntries } = await supabase
     }
   }
 
+  .burned-section {
+    backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.2);
+  }
+
   .burned-section h2 {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1.5rem;
+    color: rgb(226, 232, 240);
   }
 
   .burned-list {
@@ -428,10 +476,10 @@ const { data: burnedEntries } = await supabase
   }
 
   .burned-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 100, 0, 0.2);
-    border-radius: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: 0.75rem;
     padding: 1.5rem;
   }
 
@@ -447,7 +495,7 @@ const { data: burnedEntries } = await supabase
   }
 
   .burned-date {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(226, 232, 240, 0.6);
     font-size: 0.875rem;
   }
 
@@ -460,7 +508,7 @@ const { data: burnedEntries } = await supabase
   .original,
   .transmuted {
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 0.5rem;
   }
 
@@ -468,24 +516,24 @@ const { data: burnedEntries } = await supabase
   .transmuted strong {
     display: block;
     margin-bottom: 0.5rem;
-    color: #ff6b35;
+    color: #fb923c;
   }
 
   .original p,
   .transmuted p {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgb(226, 232, 240);
     line-height: 1.6;
     white-space: pre-wrap;
   }
 
   .transmuted {
-    border-left: 3px solid #ff6b35;
+    border-left: 3px solid #fb923c;
   }
 
   .empty-state {
     text-align: center;
     padding: 3rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(226, 232, 240, 0.6);
   }
 </style>
 
