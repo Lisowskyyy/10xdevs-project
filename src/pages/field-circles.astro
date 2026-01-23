@@ -6,32 +6,81 @@ const supabase = createServerSupabaseClient(Astro.cookies);
 
 // Pobierz WSZYSTKO jak leci
 const { data: circles } = await supabase.from("field_circles").select("*").order("created_at", { ascending: false });
+
+// Format date helper
+function formatDate(dateString: string | null) {
+  if (!dateString) return "Nie zaplanowano";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("pl-PL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 ---
 
-<Layout title="Diagnostyka Kręgów">
-  <div class="p-10 text-white">
-    <h1 class="text-3xl mb-8">🔍 Wszystkie Kręgi w Bazie ({circles?.length})</h1>
+<Layout title="Portale Energii">
+  <div class="p-6 md:p-10 text-white min-h-screen">
+    <div class="max-w-7xl mx-auto">
+      <h1
+        class="text-4xl md:text-5xl mb-2 font-serif text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-purple-400"
+      >
+        Portale Energii
+      </h1>
+      <p class="text-slate-400 mb-8 text-lg">
+        {circles?.length || 0}{" "}
+        {circles?.length === 1 ? "portal aktywny" : "portali aktywnych"}
+      </p>
 
-    <div class="grid gap-4">
-      {
-        circles?.map((c) => (
-          <div class="border p-4 rounded bg-gray-800 flex justify-between items-center">
-            <div>
-              <h2 class="text-xl font-bold">{c.intention}</h2>
-              <p class="text-gray-400">ID: {c.id}</p>
-              <p class="text-yellow-400">
-                Status w bazie: <strong>'{c.status}'</strong>
-              </p>
-              <p class="text-blue-300">Data Startu: {c.scheduled_at}</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {
+          circles?.map((c) => (
+            <div class="bg-slate-900/60 backdrop-blur-md border border-[#d4af37]/20 rounded-xl p-6 hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div class="flex items-start justify-between mb-4">
+                  <h2 class="text-xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-purple-400 flex-1 pr-4">
+                    {c.intention}
+                  </h2>
+                  <span class="text-xs uppercase tracking-widest px-2 py-1 rounded-full bg-purple-900/30 text-purple-300 border border-purple-500/20 whitespace-nowrap">
+                    {c.status}
+                  </span>
+                </div>
+
+                <div class="space-y-2 mb-4">
+                  <p class="text-slate-400 text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    {formatDate(c.scheduled_at)}
+                  </p>
+                  <p class="text-slate-500 text-xs font-mono">ID: {c.id}</p>
+                </div>
+              </div>
+
+              <a
+                href={`/circles/${c.id}`}
+                class="mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-purple-900/50 px-6 py-3 rounded-lg text-center transition-all duration-300 inline-block w-full"
+              >
+                Wejdź
+              </a>
             </div>
-            <a href={`/circles/${c.id}`} class="bg-indigo-600 px-4 py-2 rounded">
-              Wejdź
-            </a>
-          </div>
-        ))
-      }
-    </div>
+          ))
+        }
+      </div>
 
-    <a href="/circles/create" class="block mt-8 text-center bg-green-600 p-4 rounded">Stwórz Nowy</a>
+      <a
+        href="/circles/create"
+        class="block max-w-md mx-auto text-center bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold shadow-lg shadow-green-900/50 p-4 rounded-xl transition-all duration-300"
+      >
+        Stwórz Nowy Portal
+      </a>
+    </div>
   </div>
 </Layout>

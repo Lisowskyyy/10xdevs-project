@@ -76,6 +76,13 @@ const navLinks = [
         <!-- PANEL BOCZNY (Wysuwane Menu) -->
         <div id="menu-sidebar" class="fixed top-0 right-0 h-full w-full md:w-[400px] z-40 bg-[#0a0a16]/95 border-l border-white/10 backdrop-blur-2xl transform translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-[-20px_0_50px_rgba(0,0,0,0.5)] pt-28 pb-10 px-6 flex flex-col">
             
+            <!-- Sidebar Toggle Arrow Button -->
+            <button id="sidebar-close-btn" class="absolute top-6 left-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all group">
+                <svg class="w-5 h-5 text-slate-300 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            
             <div class="flex flex-col gap-2 flex-1 overflow-y-auto custom-scrollbar">
                 {navLinks.map((link, index) => {
                     // Sprawdzamy czy jesteśmy na danej podstronie
@@ -119,6 +126,7 @@ const navLinks = [
                 const menuBtn = document.getElementById('menu-btn');
                 const menuSidebar = document.getElementById('menu-sidebar');
                 const menuOverlay = document.getElementById('menu-overlay');
+                const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
                 const menuBars = document.querySelectorAll('.menu-bar-1, .menu-bar-2, .menu-bar-3');
                 let isOpen = false;
 
@@ -142,8 +150,15 @@ const navLinks = [
                     }
                 }
 
+                function closeMenu() {
+                    if (isOpen) {
+                        toggleMenu();
+                    }
+                }
+
                 if (menuBtn) menuBtn.addEventListener('click', toggleMenu);
                 if (menuOverlay) menuOverlay.addEventListener('click', toggleMenu);
+                if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', closeMenu);
             })();
         </script>
       </>
