@@ -63,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { error: insertError } = await supabaseAdmin.from("gratitude_entries").insert([
       {
         user_id: userId,
-        content: text,
+        gratitude_text: text,
         ai_response: aiResponse,
         mood: "Reflective", // Uproszczone, bo AI teraz pisze opisowo
       },
