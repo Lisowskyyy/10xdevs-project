@@ -42,27 +42,28 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
   <div class="dashboard-container">
     <!-- Main Content -->
     <main class="dashboard-main">
-      <!-- Welcome Section -->
-      <section class="welcome-section">
-        <div class="welcome-header">
-          <div>
-            <h2>Welcome back, {profile?.display_name || "Seeker"}</h2>
-            <p class="tagline">Continue your liberation journey.</p>
-          </div>
-          <a href="/profile" class="edit-profile-btn">Edit Profile</a>
+      <!-- Hero Section - Welcome -->
+      <section class="hero-section">
+        <div class="hero-glow"></div>
+        <div class="hero-content">
+          <h1 class="hero-greeting">Welcome back,</h1>
+          <h2 class="hero-name">{profile?.display_name || "Seeker"}</h2>
+          <p class="hero-tagline">Continue your liberation journey</p>
         </div>
+        <a href="/profile" class="edit-profile-btn">Edit Profile</a>
       </section>
 
-      <!-- Gratitude Journal - Main Feature -->
+      <!-- Centerpiece - Gratitude Journal -->
       <section class="journal-section">
-        <div class="journal-container">
+        <div class="journal-wrapper">
           <GratitudeJournal userId={session.user.id} />
         </div>
       </section>
 
-      <!-- Stats Cards -->
-      <section class="stats-grid">
-        <div class="stat-card">
+      <!-- Stats & Features Grid -->
+      <section class="cards-grid">
+        <!-- Stats Cards -->
+        <div class="stat-card glass-card">
           <div class="stat-icon">🔥</div>
           <div class="stat-content">
             <p class="stat-label">Current Streak</p>
@@ -70,7 +71,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card glass-card">
           <div class="stat-icon">📝</div>
           <div class="stat-content">
             <p class="stat-label">Total Entries</p>
@@ -78,7 +79,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card glass-card">
           <div class="stat-icon">{currentStage.emoji}</div>
           <div class="stat-content">
             <p class="stat-label">Current Stage</p>
@@ -86,36 +87,34 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card glass-card">
           <div class="stat-icon">🌍</div>
           <div class="stat-content">
             <p class="stat-label">Field Circles</p>
             <p class="stat-value">{profile?.total_circles || 0}</p>
           </div>
         </div>
-      </section>
 
-      <!-- Feature Cards -->
-      <section class="features-grid">
-        <a href="/journal" class="feature-card">
+        <!-- Feature Cards -->
+        <a href="/journal" class="feature-card glass-card">
           <div class="feature-icon">📖</div>
           <h3>Journal</h3>
           <p>Write your thoughts and receive AI insights</p>
         </a>
 
-        <a href="/dracarys" class="feature-card">
+        <a href="/dracarys" class="feature-card glass-card">
           <div class="feature-icon">🔥</div>
           <h3>Dracarys Mode</h3>
           <p>Transform and release negative patterns</p>
         </a>
 
-        <a href="/field-circles" class="feature-card">
+        <a href="/field-circles" class="feature-card glass-card">
           <div class="feature-icon">🌐</div>
           <h3>Field Circles</h3>
           <p>Join global meditation sessions</p>
         </a>
 
-        <a href="/progress" class="feature-card">
+        <a href="/progress" class="feature-card glass-card">
           <div class="feature-icon">📊</div>
           <h3>Progress</h3>
           <p>Track your transformation journey</p>
@@ -128,184 +127,276 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
 <style>
   .dashboard-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a1625 25%, #0f0f1a 50%, #1a1625 75%, #0a0a0f 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
     color: white;
+    position: relative;
   }
 
-  .dashboard-header {
-    backdrop-filter: blur(10px);
-    background: rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1.5rem 2rem;
-  }
-
-  .header-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #d4af37 0%, #f4e5c3 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .user-actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .user-name {
-    font-weight: 500;
-  }
-
-  .btn-signout {
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 0.5rem;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .btn-signout:hover {
-    background: rgba(255, 255, 255, 0.2);
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   .dashboard-main {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 3rem 2rem;
+    padding: 4rem 2rem;
+    position: relative;
+    z-index: 1;
   }
 
-  .welcome-section {
-    margin-bottom: 3rem;
+  /* Hero Section */
+  .hero-section {
+    text-align: center;
+    margin-bottom: 5rem;
+    position: relative;
+    padding: 3rem 0;
   }
 
+  .hero-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(212, 175, 55, 0.15) 0%,
+      rgba(212, 175, 55, 0.05) 40%,
+      transparent 70%
+    );
+    filter: blur(60px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 2rem;
+  }
+
+  .hero-greeting {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-name {
+    font-size: 4rem;
+    font-weight: 400;
+    font-family: "Georgia", "Times New Roman", serif;
+    background: linear-gradient(135deg, #f4e5c3 0%, #d4af37 50%, #f4e5c3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0.5rem 0 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-tagline {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 300;
+    letter-spacing: 0.03em;
+  }
+
+  .edit-profile-btn {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 2rem;
+    color: #d4af37;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .edit-profile-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: rgba(212, 175, 55, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
+  }
+
+  /* Journal Section - Centerpiece */
   .journal-section {
-    margin-bottom: 3rem;
+    margin-bottom: 5rem;
+    padding: 3rem 0;
   }
 
-  .journal-container {
-    max-width: 56rem; /* max-w-4xl equivalent */
+  .journal-wrapper {
+    max-width: 56rem;
     margin: 0 auto;
     padding: 0 1rem;
   }
 
-  .welcome-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-  }
-
-  .welcome-section h2 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
-  .tagline {
-    font-size: 1.125rem;
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  .edit-profile-btn {
-    padding: 0.75rem 1.5rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 0.5rem;
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s;
-    white-space: nowrap;
-  }
-
-  .edit-profile-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(212, 175, 55, 0.5);
-    transform: translateY(-2px);
-  }
-
-  .stats-grid {
+  /* Unified Cards Grid */
+  .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(1, 1fr);
     gap: 1.5rem;
-    margin-bottom: 3rem;
   }
 
-  .stat-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+  @media (min-width: 768px) {
+    .cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .cards-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Glassmorphism Card Base */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 1.5rem;
+    border-radius: 1.25rem;
+    padding: 1.75rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateY(-6px);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(212, 175, 55, 0.1);
+  }
+
+  .glass-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Stat Cards */
+  .stat-card {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .stat-icon {
-    font-size: 2rem;
+    font-size: 2.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .stat-content {
+    flex: 1;
   }
 
   .stat-label {
     font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin-bottom: 0.25rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
   }
 
   .stat-value {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: white;
+    line-height: 1.2;
   }
 
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-  }
-
+  /* Feature Cards */
   .feature-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 2rem;
     text-decoration: none;
     color: white;
-    transition: all 0.3s;
-    cursor: pointer;
-  }
-
-  .feature-card:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(212, 175, 55, 0.5);
-    transform: translateY(-4px);
+    display: flex;
+    flex-direction: column;
+    text-align: center;
   }
 
   .feature-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 3.5rem;
+    margin-bottom: 1.25rem;
+    line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
   }
 
   .feature-card h3 {
     font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: white;
   }
 
   .feature-card p {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.6);
     line-height: 1.6;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .hero-name {
+      font-size: 2.5rem;
+    }
+
+    .hero-greeting {
+      font-size: 1.25rem;
+    }
+
+    .hero-tagline {
+      font-size: 1rem;
+    }
+
+    .dashboard-main {
+      padding: 2rem 1.5rem;
+    }
+
+    .journal-section {
+      padding: 2rem 0;
+      margin-bottom: 3rem;
+    }
+
+    .hero-section {
+      margin-bottom: 3rem;
+      padding: 2rem 0;
+    }
+
+    .hero-glow {
+      width: 400px;
+      height: 200px;
+    }
   }
 </style>

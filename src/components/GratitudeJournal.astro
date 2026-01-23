@@ -7,46 +7,225 @@ interface Props {
 const { userId } = Astro.props;
 ---
 
-<div class="max-w-2xl mx-auto mt-8 p-6 bg-slate-800/50 rounded-xl border border-gold/20 shadow-lg backdrop-blur-sm">
-  <h2 class="text-2xl font-light text-gold mb-4 font-serif">Dziennik Wdzięczności</h2>
+<div class="gratitude-journal-container">
+  <h2 class="gratitude-journal-title">Dziennik Wdzięczności</h2>
 
   <form id="journalForm" class="space-y-4" data-user-id={userId}>
     <div class="relative">
       <textarea
         id="journalEntry"
         name="entry"
-        rows="4"
+        rows="5"
         placeholder="Za co jesteś dzisiaj wdzięczny? (Nasionko słucha...)"
-        class="w-full bg-slate-900/50 border border-slate-700 rounded-lg p-4 text-slate-200 placeholder-slate-500 focus:border-gold/50 focus:ring-1 focus:ring-gold/50 transition-all resize-none"
+        class="gratitude-textarea"
         required></textarea>
 
       <!-- Loader (domyślnie ukryty) -->
-      <div id="loader" class="absolute inset-0 bg-slate-900/80 rounded-lg flex items-center justify-center hidden">
-        <div class="flex flex-col items-center">
-          <div class="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin"></div>
-          <p class="text-xs text-gold mt-2 animate-pulse">Analizuję Twoje myśli...</p>
+      <div id="loader" class="gratitude-loader hidden">
+        <div class="loader-content">
+          <div class="loader-spinner"></div>
+          <p class="loader-text">Analizuję Twoje myśli...</p>
         </div>
       </div>
     </div>
 
-    <div class="flex justify-end">
-      <button
-        type="submit"
-        class="px-6 py-2 bg-gradient-to-r from-gold/80 to-gold text-slate-900 font-medium rounded-lg hover:shadow-[0_0_15px_rgba(255,215,0,0.3)] transition-all transform hover:-translate-y-0.5"
-      >
-        Zapisz i Poczuj ✨
-      </button>
+    <div class="gratitude-submit-wrapper">
+      <button type="submit" class="gratitude-submit-btn">Zapisz i Poczuj ✨</button>
     </div>
   </form>
 
   <!-- Sekcja odpowiedzi AI (domyślnie ukryta) -->
-  <div id="aiResponse" class="mt-6 hidden opacity-0 transition-opacity duration-700">
-    <div class="p-4 bg-purple-900/20 border-l-2 border-purple-400 rounded-r-lg">
-      <h3 class="text-sm font-bold text-purple-300 mb-1 uppercase tracking-wider">Refleksja Veranimy</h3>
-      <p id="aiText" class="text-slate-300 italic leading-relaxed"></p>
+  <div id="aiResponse" class="gratitude-ai-response hidden opacity-0">
+    <div class="ai-response-content">
+      <h3 class="ai-response-title">Refleksja Veranimy</h3>
+      <p id="aiText" class="ai-response-text"></p>
     </div>
   </div>
 </div>
+
+<style>
+  .gratitude-journal-container {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 1.5rem;
+    padding: 2.5rem;
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.3),
+      0 0 40px rgba(212, 175, 55, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gratitude-journal-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+  }
+
+  .gratitude-journal-title {
+    font-size: 1.875rem;
+    font-weight: 300;
+    color: #d4af37;
+    margin-bottom: 2rem;
+    font-family: "Georgia", "Times New Roman", serif;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  .gratitude-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: none;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+
+  .gratitude-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .gratitude-textarea:focus {
+    outline: none;
+    border-color: rgba(212, 175, 55, 0.5);
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  }
+
+  .gratitude-loader {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .loader-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    border-top-color: #d4af37;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loader-text {
+    font-size: 0.875rem;
+    color: #d4af37;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .gratitude-submit-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+  }
+
+  .gratitude-submit-btn {
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.9) 0%, #d4af37 100%);
+    color: #0a0a0f;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  }
+
+  .gratitude-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4);
+    background: linear-gradient(135deg, #d4af37 0%, rgba(212, 175, 55, 0.95) 100%);
+  }
+
+  .gratitude-submit-btn:active {
+    transform: translateY(0);
+  }
+
+  .gratitude-ai-response {
+    margin-top: 2rem;
+    transition: opacity 0.7s ease;
+  }
+
+  .ai-response-content {
+    padding: 1.5rem;
+    background: rgba(139, 69, 139, 0.15);
+    backdrop-filter: blur(10px);
+    border-left: 3px solid rgba(212, 175, 55, 0.6);
+    border-radius: 0 0.75rem 0.75rem 0;
+  }
+
+  .ai-response-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(212, 175, 55, 0.9);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .ai-response-text {
+    color: rgba(255, 255, 255, 0.85);
+    font-style: italic;
+    line-height: 1.7;
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .gratitude-journal-container {
+      padding: 1.75rem;
+    }
+
+    .gratitude-journal-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .gratitude-textarea {
+      padding: 1rem;
+      font-size: 0.95rem;
+    }
+  }
+</style>
 
 <!-- eslint-disable prettier/prettier -->
 <script is:inline>
