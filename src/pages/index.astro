@@ -13,14 +13,26 @@ if (session) {
 ---
 
 <Layout title="VERANIMA | Cyfrowa Świątynia" showNav={false}>
-  <div class="min-h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden">
-    <!-- Tło z gradientem (możesz dostosować kolory) -->
-    <div class="absolute inset-0 z-0 bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] opacity-90"></div>
+  <!-- Floating Login Button -->
+  <div class="fixed top-6 right-6 z-50">
+    <a
+      href="/login"
+      class="px-6 py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold hover:scale-105 transition-transform shadow-lg shadow-amber-500/20 backdrop-blur-sm"
+    >
+      Login
+    </a>
+  </div>
 
-    <!-- Treść -->
+  <!-- Hero Section -->
+  <section
+    id="hero"
+    class="h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
+  >
+    <div class="absolute inset-0 z-0 bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e]"></div>
+
     <div class="relative z-10 max-w-3xl animate-fade-in-up">
       <h1
-        class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6 drop-shadow-lg"
+        class="text-6xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6 drop-shadow-lg"
       >
         VERANIMA
       </h1>
@@ -29,35 +41,7 @@ if (session) {
         "Twoja cyfrowa świątynia. Uwolnij umysł, spal to co zbędne, odnajdź spokój."
       </p>
 
-      <!-- Karty Funkcji -->
-      <div class="grid md:grid-cols-3 gap-6 mb-16 text-left">
-        <div class="bg-white/5 p-6 rounded-xl border border-white/10 hover:border-amber-500/50 transition-colors">
-          <div class="text-3xl mb-3">🐉</div>
-          <h3 class="text-lg font-bold text-amber-100 mb-2">Dracarys</h3>
-          <p class="text-sm text-gray-400">Wizualne spalanie negatywnych myśli i lęków.</p>
-        </div>
-
-        <div class="bg-white/5 p-6 rounded-xl border border-white/10 hover:border-green-500/50 transition-colors">
-          <div class="text-3xl mb-3">💚</div>
-          <h3 class="text-lg font-bold text-green-100 mb-2">Wdzięczność</h3>
-          <p class="text-sm text-gray-400">Codzienny dziennik budujący Twoją wewnętrzną siłę.</p>
-        </div>
-
-        <div class="bg-white/5 p-6 rounded-xl border border-white/10 hover:border-blue-500/50 transition-colors">
-          <div class="text-3xl mb-3">🧘‍♂️</div>
-          <h3 class="text-lg font-bold text-blue-100 mb-2">Medytacja</h3>
-          <p class="text-sm text-gray-400">Kręgi Mocy i intencje wspierające Twój rozwój.</p>
-        </div>
-      </div>
-
-      <!-- Przyciski Akcji -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a
-          href="/login"
-          class="px-8 py-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold hover:scale-105 transition-transform shadow-lg shadow-amber-500/20"
-        >
-          Wejdź do Świątyni (Logowanie)
-        </a>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
         <a
           href="/signup"
           class="px-8 py-3 rounded-full bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors font-semibold backdrop-blur-sm"
@@ -66,11 +50,103 @@ if (session) {
         </a>
       </div>
     </div>
-  </div>
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+      <div class="flex flex-col items-center gap-2 text-gray-400">
+        <span class="text-sm font-light">Scroll to explore</span>
+        <span class="text-2xl">↓</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gratitude Section -->
+  <section
+    id="gratitude"
+    class="h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
+  >
+    <div class="absolute inset-0 z-0 bg-gradient-to-b from-indigo-900 via-violet-900 to-purple-900"></div>
+
+    <div class="relative z-10 max-w-3xl">
+      <div class="text-8xl mb-8 animate-glow">📖</div>
+      <h2
+        class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-200 to-indigo-300 mb-6"
+      >
+        Dziennik Wdzięczności
+      </h2>
+      <p class="text-xl md:text-2xl text-gray-200 mb-8 font-light leading-relaxed">
+        Codzienny dziennik budujący Twoją wewnętrzną siłę.
+        <br />
+        Praktykuj wdzięczność i wzmacniaj pozytywne myśli.
+      </p>
+    </div>
+  </section>
+
+  <!-- Dracarys Section -->
+  <section
+    id="dracarys"
+    class="h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
+  >
+    <div class="absolute inset-0 z-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"></div>
+
+    <!-- Fire Effect -->
+    <div class="absolute bottom-0 left-0 right-0 h-32 z-0 fire-container">
+      <div class="fire"></div>
+      <div class="fire"></div>
+      <div class="fire"></div>
+      <div class="fire"></div>
+      <div class="fire"></div>
+    </div>
+
+    <div class="relative z-10 max-w-3xl">
+      <div class="text-8xl mb-8 dragon-icon">🐉</div>
+      <h2
+        class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-400 mb-6"
+      >
+        Dracarys Mode
+      </h2>
+      <p class="text-xl md:text-2xl text-gray-200 mb-8 font-light leading-relaxed">
+        Wizualne spalanie negatywnych myśli i lęków.
+        <br />
+        Uwolnij się od tego, co Cię ogranicza.
+      </p>
+    </div>
+  </section>
+
+  <!-- Meditation Section -->
+  <section
+    id="meditation"
+    class="h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
+  >
+    <div class="absolute inset-0 z-0 bg-gradient-to-b from-teal-900 via-cyan-900 to-blue-900"></div>
+
+    <div class="relative z-10 max-w-3xl">
+      <div class="text-8xl mb-8 lotus-icon">🧘‍♂️</div>
+      <h2
+        class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-cyan-300 mb-6"
+      >
+        Kręgi Mocy
+      </h2>
+      <p class="text-xl md:text-2xl text-gray-200 mb-8 font-light leading-relaxed">
+        Wspólna medytacja i intencje wspierające Twój rozwój.
+        <br />
+        Doświadcz przepływu energii i muzyki.
+      </p>
+    </div>
+  </section>
 </Layout>
 
 <style>
-  /* Prosta animacja wejścia */
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+  }
+
+  section {
+    scroll-snap-align: start;
+  }
+
+  /* Fade in animation */
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -83,5 +159,166 @@ if (session) {
   }
   .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  /* Glow animation for book icon */
+  @keyframes glow {
+    0%,
+    100% {
+      filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5));
+      transform: scale(1);
+    }
+    50% {
+      filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.8));
+      transform: scale(1.05);
+    }
+  }
+  .animate-glow {
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  /* Dragon hover glow */
+  .dragon-icon {
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  .dragon-icon:hover {
+    filter: drop-shadow(0 0 40px rgba(251, 146, 60, 0.8));
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  /* Lotus icon with radiating circles */
+  .lotus-icon {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .lotus-icon::before,
+  .lotus-icon::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(94, 234, 212, 0.3);
+    border-radius: 50%;
+    animation: ripple 3s ease-out infinite;
+  }
+  .lotus-icon::before {
+    width: 120px;
+    height: 120px;
+    animation-delay: 0s;
+  }
+  .lotus-icon::after {
+    width: 180px;
+    height: 180px;
+    animation-delay: 1s;
+  }
+  @keyframes ripple {
+    0% {
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.5);
+      opacity: 0;
+    }
+  }
+  .lotus-icon:hover {
+    filter: drop-shadow(0 0 30px rgba(94, 234, 212, 0.6));
+    transform: scale(1.1);
+  }
+
+  /* Fire Effect */
+  .fire-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 120px;
+  }
+
+  .fire {
+    width: 60px;
+    height: 100%;
+    background: linear-gradient(
+      to top,
+      rgba(251, 146, 60, 0.8) 0%,
+      rgba(239, 68, 68, 0.6) 30%,
+      rgba(220, 38, 38, 0.4) 60%,
+      transparent 100%
+    );
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    position: relative;
+    animation: flicker 2s infinite ease-in-out;
+    filter: blur(2px);
+  }
+
+  .fire:nth-child(1) {
+    animation-delay: 0s;
+    width: 50px;
+    height: 80px;
+  }
+
+  .fire:nth-child(2) {
+    animation-delay: 0.4s;
+    width: 70px;
+    height: 100px;
+  }
+
+  .fire:nth-child(3) {
+    animation-delay: 0.2s;
+    width: 60px;
+    height: 90px;
+  }
+
+  .fire:nth-child(4) {
+    animation-delay: 0.6s;
+    width: 65px;
+    height: 95px;
+  }
+
+  .fire:nth-child(5) {
+    animation-delay: 0.3s;
+    width: 55px;
+    height: 85px;
+  }
+
+  @keyframes flicker {
+    0%,
+    100% {
+      transform: scaleY(1) scaleX(1);
+      opacity: 0.8;
+    }
+    25% {
+      transform: scaleY(1.1) scaleX(0.95);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scaleY(0.95) scaleX(1.05);
+      opacity: 0.85;
+    }
+    75% {
+      transform: scaleY(1.05) scaleX(0.98);
+      opacity: 0.9;
+    }
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    section {
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      font-size: 3rem !important;
+    }
+
+    h2 {
+      font-size: 2.5rem !important;
+    }
+
+    .fire {
+      width: 40px !important;
+      height: 60px !important;
+    }
   }
 </style>

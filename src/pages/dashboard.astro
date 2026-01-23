@@ -46,11 +46,11 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
       <section class="hero-section">
         <div class="hero-glow"></div>
         <div class="hero-content">
-          <h1 class="hero-greeting">Welcome back,</h1>
+          <h1 class="hero-greeting">Witaj ponownie,</h1>
           <h2 class="hero-name">{profile?.display_name || "Seeker"}</h2>
-          <p class="hero-tagline">Continue your liberation journey</p>
+          <p class="hero-tagline">Kontynuuj swoją podróż oczyszczenia duszy</p>
         </div>
-        <a href="/profile" class="edit-profile-btn">Edit Profile</a>
+        <a href="/profile" class="edit-profile-btn">Edytuj profil</a>
       </section>
 
       <!-- Centerpiece - Gratitude Journal -->
@@ -66,7 +66,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
         <div class="stat-card glass-card">
           <div class="stat-icon">🔥</div>
           <div class="stat-content">
-            <p class="stat-label">Current Streak</p>
+            <p class="stat-label">Aktualna passa</p>
             <p class="stat-value">{profile?.streak_days || 0} days</p>
           </div>
         </div>
@@ -74,7 +74,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
         <div class="stat-card glass-card">
           <div class="stat-icon">📝</div>
           <div class="stat-content">
-            <p class="stat-label">Total Entries</p>
+            <p class="stat-label">Ilość wpisów</p>
             <p class="stat-value">{profile?.total_entries || 0}</p>
           </div>
         </div>
@@ -82,7 +82,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
         <div class="stat-card glass-card">
           <div class="stat-icon">{currentStage.emoji}</div>
           <div class="stat-content">
-            <p class="stat-label">Current Stage</p>
+            <p class="stat-label">Etap Alchemiczny</p>
             <p class="stat-value">{currentStage.name}</p>
           </div>
         </div>
@@ -90,7 +90,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
         <div class="stat-card glass-card">
           <div class="stat-icon">🌍</div>
           <div class="stat-content">
-            <p class="stat-label">Field Circles</p>
+            <p class="stat-label">Kręgi medytacyjne</p>
             <p class="stat-value">{profile?.total_circles || 0}</p>
           </div>
         </div>
@@ -98,26 +98,26 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
         <!-- Feature Cards -->
         <a href="/journal" class="feature-card glass-card">
           <div class="feature-icon">📖</div>
-          <h3>Journal</h3>
-          <p>Write your thoughts and receive AI insights</p>
+          <h3>Dziennik</h3>
+          <p>Zapisz swoje myśli i otrzymaj wskazówki od Veranimy</p>
         </a>
 
         <a href="/dracarys" class="feature-card glass-card">
           <div class="feature-icon">🔥</div>
-          <h3>Dracarys Mode</h3>
-          <p>Transform and release negative patterns</p>
+          <h3>Dracarys</h3>
+          <p>Przekształć i uwolnij negatywne myśli i lęki</p>
         </a>
 
         <a href="/field-circles" class="feature-card glass-card">
           <div class="feature-icon">🌐</div>
-          <h3>Field Circles</h3>
-          <p>Join global meditation sessions</p>
+          <h3>Kręgi medytacyjne</h3>
+          <p>Dołącz do globalnych sesji medytacyjnych lub twórz własne</p>
         </a>
 
         <a href="/progress" class="feature-card glass-card">
           <div class="feature-icon">📊</div>
-          <h3>Progress</h3>
-          <p>Track your transformation journey</p>
+          <h3>Postępy</h3>
+          <p>Śledź swoją podróż oczyszczenia duszy</p>
         </a>
       </section>
     </main>
