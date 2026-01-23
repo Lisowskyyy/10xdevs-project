@@ -1,16 +1,29 @@
 // src/pages/api/journal.ts
 import type { APIRoute } from "astro";
 import OpenAI from "openai";
-import { supabase } from "../../lib/supabase";
+import { createServerSupabaseClient } from "../../lib/supabase";
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
-    const { text, userId } = body;
+    const { text } = body;
 
     if (!text) return new Response(JSON.stringify({ error: "Pusty wpis" }), { status: 400 });
     if (!import.meta.env.OPENAI_API_KEY)
       return new Response(JSON.stringify({ error: "Brak klucza API" }), { status: 500 });
+
+    // Initialize Supabase client with session context (required for RLS)
+    const supabase = createServerSupabaseClient(cookies);
+
+    // Get user session - required for RLS policies
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+      return new Response(JSON.stringify({ error: "Brak autoryzacji" }), { status: 401 });
+    }
 
     // 1. ULEPSZONA ANALIZA AI (Wersja "Mistyczny Przewodnik")
     const openai = new OpenAI({ apiKey: import.meta.env.OPENAI_API_KEY });
@@ -42,20 +55,20 @@ export const POST: APIRoute = async ({ request }) => {
 
     // 2. WSPÓLNA PAMIĘĆ (Zapis do tabeli gratitude_entries)
     // To sprawia, że wpis będzie widoczny i na Dashboardzie, i w "Dużym Dzienniku" (jeśli on czyta z tej tabeli)
-    if (userId) {
-      const { error } = await supabase.from("gratitude_entries").insert([
-        {
-          user_id: userId,
-          content: text,
-          ai_response: aiResponse,
-          mood: "Reflective", // Uproszczone, bo AI teraz pisze opisowo
-        },
-      ]);
+    // Use session.user.id directly - RLS will verify auth.uid() matches user_id
+    const { error: insertError } = await supabase.from("gratitude_entries").insert([
+      {
+        user_id: session.user.id,
+        content: text,
+        ai_response: aiResponse,
+        mood: "Reflective", // Uproszczone, bo AI teraz pisze opisowo
+      },
+    ]);
 
-      if (error) {
-        // Log error but don't fail the request - AI response is still returned
-        // In production, consider using a proper logging service
-      }
+    if (insertError) {
+      // Log error for debugging - this helps identify RLS or schema issues
+      console.error("Error saving gratitude entry:", insertError);
+      // Still return AI response even if save fails, but log the error
     }
 
     return new Response(
