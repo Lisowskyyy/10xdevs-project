@@ -75,136 +75,137 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
 <Layout title="Profile - VERANIMA">
   <div class="profile-container">
     <main class="profile-main">
-      <!-- Header Section with Edit Form -->
-      <section class="profile-header">
-        <div class="profile-header-content">
-          <!-- Avatar -->
-          <div class="profile-avatar">
-            <div class="avatar-wrapper">
-              {
-                user.user_metadata?.avatar_url ? (
-                  <img src={user.user_metadata.avatar_url} alt="Avatar" class="avatar-image" />
-                ) : (
-                  <div class="avatar-placeholder">🧘‍♂️</div>
-                )
-              }
+      <!-- Seeker Identity Card -->
+      <div class="identity-card">
+        <!-- Avatar Section -->
+        <div class="avatar-section">
+          <div class="avatar-glow"></div>
+          <div class="avatar-wrapper">
+            {
+              user.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="Avatar" class="avatar-image" />
+              ) : (
+                <div class="avatar-placeholder">🧘‍♂️</div>
+              )
+            }
+          </div>
+        </div>
+
+        <!-- Profile Title -->
+        <h1 class="profile-title">Your Profile</h1>
+
+        <!-- Edit Profile Form -->
+        <form method="POST" class="profile-form">
+          <input type="hidden" name="action" value="update_profile" />
+
+          <div class="form-group">
+            <label for="first_name" class="form-label">First Name</label>
+            <input
+              type="text"
+              id="first_name"
+              name="first_name"
+              value={profile?.first_name || ""}
+              placeholder="Enter your first name"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="last_name" class="form-label">Last Name</label>
+            <input
+              type="text"
+              id="last_name"
+              name="last_name"
+              value={profile?.last_name || ""}
+              placeholder="Enter your last name"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-update">Update Profile</button>
+          </div>
+        </form>
+
+        <!-- Sign Out Button -->
+        <form method="POST" action="/api/auth/signout" class="signout-form">
+          <button type="submit" class="btn-signout">Sign Out</button>
+        </form>
+
+        <!-- Statistics Section -->
+        <div class="stats-section">
+          <div class="stat-card">
+            <div class="stat-label">Total Sessions</div>
+            <div class="stat-value">{totalSessions}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Minutes</div>
+            <div class="stat-value">
+              {totalMinutes}<span class="stat-unit">min</span>
             </div>
           </div>
+        </div>
 
-          <!-- Edit Profile Form -->
-          <div class="profile-form-section">
-            <h2 class="profile-title">Edit Profile</h2>
-
-            <form method="POST" class="profile-form">
-              <input type="hidden" name="action" value="update_profile" />
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="first_name" class="form-label">First Name</label>
-                  <input
-                    type="text"
-                    id="first_name"
-                    name="first_name"
-                    value={profile?.first_name || ""}
-                    placeholder="Enter your first name"
-                    class="form-input"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label for="last_name" class="form-label">Last Name</label>
-                  <input
-                    type="text"
-                    id="last_name"
-                    name="last_name"
-                    value={profile?.last_name || ""}
-                    placeholder="Enter your last name"
-                    class="form-input"
-                  />
-                </div>
-              </div>
-
-              <div class="form-actions">
-                <button type="submit" class="btn-save">Save Changes</button>
-              </div>
-            </form>
+        <!-- Meditation Logs Section -->
+        <div class="logs-section">
+          <div class="logs-header">
+            <h2 class="logs-title">Meditation History</h2>
+            <span class="logs-subtitle">Recent entries</span>
           </div>
-        </div>
-      </section>
 
-      <!-- Statistics Section -->
-      <section class="stats-section">
-        <div class="stat-card">
-          <div class="stat-label">Total Sessions</div>
-          <div class="stat-value">{totalSessions}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Total Minutes</div>
-          <div class="stat-value">
-            {totalMinutes}<span class="stat-unit">min</span>
-          </div>
-        </div>
-      </section>
+          {
+            logs && logs.length > 0 ? (
+              <div class="logs-list">
+                {logs.map((log) => {
+                  const fieldCircle = Array.isArray(log.field_circles) ? log.field_circles[0] : log.field_circles;
+                  const intention = fieldCircle?.intention || "Private Session";
 
-      <!-- Meditation Logs Section -->
-      <section class="logs-section">
-        <div class="logs-header">
-          <h2 class="logs-title">Meditation History</h2>
-          <span class="logs-subtitle">Recent entries</span>
-        </div>
-
-        {
-          logs && logs.length > 0 ? (
-            <div class="logs-list">
-              {logs.map((log) => {
-                const fieldCircle = Array.isArray(log.field_circles) ? log.field_circles[0] : log.field_circles;
-                const intention = fieldCircle?.intention || "Private Session";
-
-                return (
-                  <div class="log-item">
-                    <div class="log-content">
-                      <div class="log-icon">🧘</div>
-                      <div class="log-details">
-                        <div class="log-intention">{intention}</div>
-                        <div class="log-date">
-                          {new Date(log.created_at).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}{" "}
-                          •{" "}
-                          {new Date(log.created_at).toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                  return (
+                    <div class="log-item">
+                      <div class="log-content">
+                        <div class="log-icon">🧘</div>
+                        <div class="log-details">
+                          <div class="log-intention">{intention}</div>
+                          <div class="log-date">
+                            {new Date(log.created_at).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}{" "}
+                            •{" "}
+                            {new Date(log.created_at).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div class="log-actions">
-                      <div class="log-duration">+{log.duration_minutes} min</div>
+                      <div class="log-actions">
+                        <div class="log-duration">+{log.duration_minutes} min</div>
 
-                      <form
-                        method="POST"
-                        class="delete-form"
-                        onsubmit="return confirm('Are you sure you want to delete this entry?');"
-                      >
-                        <input type="hidden" name="action" value="delete_log" />
-                        <input type="hidden" name="log_id" value={log.id} />
-                        <button type="submit" class="btn-delete" title="Delete entry">
-                          🗑️
-                        </button>
-                      </form>
+                        <form
+                          method="POST"
+                          class="delete-form"
+                          onsubmit="return confirm('Are you sure you want to delete this entry?');"
+                        >
+                          <input type="hidden" name="action" value="delete_log" />
+                          <input type="hidden" name="log_id" value={log.id} />
+                          <button type="submit" class="btn-delete" title="Delete entry">
+                            🗑️
+                          </button>
+                        </form>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div class="logs-empty">No meditation history yet. Start meditating to track your journey.</div>
-          )
-        }
-      </section>
+                  );
+                })}
+              </div>
+            ) : (
+              <div class="logs-empty">No meditation history yet. Start meditating to track your journey.</div>
+            )
+          }
+        </div>
+      </div>
     </main>
   </div>
 </Layout>
@@ -212,43 +213,106 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
 <style>
   .profile-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a1625 25%, #0f0f1a 50%, #1a1625 75%, #0a0a0f 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
     color: white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   .profile-main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 3rem 2rem;
+    width: 100%;
+    max-width: 32rem;
+    position: relative;
+    z-index: 1;
   }
 
-  /* Header Section */
-  .profile-header {
-    margin-bottom: 3rem;
+  /* Seeker Identity Card */
+  .identity-card {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
   }
 
-  .profile-header-content {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 2rem;
+  .identity-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+  }
+
+  /* Avatar Section */
+  .avatar-section {
     display: flex;
-    gap: 2rem;
-    align-items: flex-start;
+    justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
   }
 
-  .profile-avatar {
-    flex-shrink: 0;
+  .avatar-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(212, 175, 55, 0.3) 0%,
+      rgba(212, 175, 55, 0.1) 50%,
+      transparent 70%
+    );
+    filter: blur(20px);
+    z-index: 0;
+    pointer-events: none;
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 0.6;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
   }
 
   .avatar-wrapper {
+    position: relative;
+    z-index: 1;
     width: 128px;
     height: 128px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 2px solid rgba(212, 175, 55, 0.5);
     padding: 2px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
   }
 
   .avatar-image {
@@ -262,35 +326,32 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: #0a0a16;
+    background: rgba(15, 23, 42, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
   }
 
-  .profile-form-section {
-    flex: 1;
-    width: 100%;
-  }
-
+  /* Typography */
   .profile-title {
+    font-family: "Georgia", "Times New Roman", serif;
     font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: white;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    background: linear-gradient(135deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
+  /* Form Styles */
   .profile-form {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
+    margin-bottom: 2.5rem;
   }
 
   .form-group {
@@ -301,102 +362,127 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
 
   .form-label {
     font-size: 0.875rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgb(148, 163, 184);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    font-weight: 500;
   }
 
   .form-input {
     width: 100%;
     padding: 0.75rem 1rem;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgb(2, 6, 23);
+    border: 1px solid rgb(30, 41, 59);
     border-radius: 0.5rem;
-    color: white;
+    color: rgb(226, 232, 240);
     font-size: 1rem;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
   }
 
   .form-input:focus {
     outline: none;
-    border-color: #667eea;
-    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(212, 175, 55, 0.5);
+    box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.5);
   }
 
   .form-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(148, 163, 184, 0.5);
   }
 
   .form-actions {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 1rem;
     margin-top: 0.5rem;
   }
 
-  .btn-save {
-    padding: 0.75rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  .btn-update {
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, #eab308 0%, #d97706 100%);
     border: none;
     border-radius: 0.5rem;
-    color: white;
-    font-weight: 600;
+    color: rgb(15, 23, 42);
+    font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3);
   }
 
-  .btn-save:hover {
+  .btn-update:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(234, 179, 8, 0.4);
   }
 
-  .btn-save:active {
+  .btn-update:active {
     transform: translateY(0);
+  }
+
+  .signout-form {
+    display: block;
+    width: 100%;
+    margin-top: -0.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .btn-signout {
+    width: 100%;
+    padding: 0.875rem 2rem;
+    background: transparent;
+    border: 1px solid rgb(71, 85, 105);
+    border-radius: 0.5rem;
+    color: rgb(148, 163, 184);
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-signout:hover {
+    background: rgba(185, 28, 28, 0.2);
+    border-color: rgb(127, 29, 29);
+    color: rgb(248, 113, 113);
   }
 
   /* Statistics Section */
   .stats-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .stat-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1rem;
-    padding: 1.5rem;
+    text-align: center;
   }
 
   .stat-label {
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.75rem;
+    color: rgb(148, 163, 184);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
     margin-bottom: 0.5rem;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .stat-value {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: white;
   }
 
   .stat-unit {
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: 400;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgb(148, 163, 184);
     margin-left: 0.25rem;
   }
 
   /* Logs Section */
   .logs-section {
-    background: rgba(10, 10, 22, 0.6);
+    background: rgba(2, 6, 23, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 1rem;
     overflow: hidden;
@@ -412,14 +498,14 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
   }
 
   .logs-title {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.25rem;
+    font-weight: 600;
     color: white;
   }
 
   .logs-subtitle {
     font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(148, 163, 184, 0.6);
   }
 
   .logs-list {
@@ -455,7 +541,7 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    background: rgba(102, 126, 234, 0.2);
+    background: rgba(212, 175, 55, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -477,7 +563,7 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
 
   .log-date {
     font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(148, 163, 184, 0.6);
   }
 
   .log-actions {
@@ -487,7 +573,7 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
   }
 
   .log-duration {
-    color: rgba(102, 126, 234, 0.8);
+    color: rgba(212, 175, 55, 0.8);
     font-family: monospace;
     font-size: 0.875rem;
     font-weight: 600;
@@ -506,46 +592,40 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
     background: transparent;
     border: none;
     border-radius: 0.5rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(148, 163, 184, 0.6);
     cursor: pointer;
     transition: all 0.3s;
     font-size: 1rem;
   }
 
   .btn-delete:hover {
-    background: rgba(239, 68, 68, 0.2);
-    color: rgba(239, 68, 68, 0.8);
+    background: rgba(185, 28, 28, 0.2);
+    color: rgb(248, 113, 113);
   }
 
   .logs-empty {
     padding: 3rem 2rem;
     text-align: center;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(148, 163, 184, 0.6);
     font-size: 1rem;
   }
 
   /* Responsive Design */
   @media (max-width: 768px) {
-    .profile-header-content {
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+    .profile-main {
+      max-width: 100%;
     }
 
-    .profile-form-section {
-      width: 100%;
+    .identity-card {
+      padding: 2rem 1.5rem;
     }
 
-    .form-row {
+    .profile-title {
+      font-size: 1.75rem;
+    }
+
+    .stats-section {
       grid-template-columns: 1fr;
-    }
-
-    .form-actions {
-      justify-content: stretch;
-    }
-
-    .btn-save {
-      width: 100%;
     }
 
     .log-item {
