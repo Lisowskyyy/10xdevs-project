@@ -1,11 +1,16 @@
 ---
 // src/components/GratitudeJournal.astro
+interface Props {
+  userId: string;
+}
+
+const { userId } = Astro.props;
 ---
 
 <div class="max-w-2xl mx-auto mt-8 p-6 bg-slate-800/50 rounded-xl border border-gold/20 shadow-lg backdrop-blur-sm">
   <h2 class="text-2xl font-light text-gold mb-4 font-serif">Dziennik Wdzięczności</h2>
 
-  <form id="journalForm" class="space-y-4">
+  <form id="journalForm" class="space-y-4" data-user-id={userId}>
     <div class="relative">
       <textarea
         id="journalEntry"
@@ -66,11 +71,18 @@
         }
 
         // Wywołanie naszego Endpointu API
-        // Pobieramy ID użytkownika z sesji Supabase (zarządzane przez endpoint, tu wysyłamy tylko tekst)
+        // Wysyłamy userId z props oraz tekst wpisu
+        const userId = form.dataset.userId;
+        if (!userId) {
+          alert("Błąd: Brak identyfikatora użytkownika.");
+          if (loader) loader.classList.add("hidden");
+          return;
+        }
+
         fetch("/api/journal", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: entry }),
+          body: JSON.stringify({ text: entry, userId: userId }),
         })
           .then((res) => res.json())
           .then((data) => {
