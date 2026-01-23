@@ -73,9 +73,18 @@ export const POST: APIRoute = async ({ request }) => {
       // Log error for debugging
       // eslint-disable-next-line no-console
       console.error("Error saving gratitude entry:", insertError);
-      return new Response(JSON.stringify({ error: "Błąd podczas zapisywania wpisu", details: insertError.message }), {
-        status: 500,
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Błąd podczas zapisywania wpisu",
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code,
+        }),
+        {
+          status: 500,
+        }
+      );
     }
 
     return new Response(
@@ -86,7 +95,26 @@ export const POST: APIRoute = async ({ request }) => {
       { status: 200 }
     );
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Wystąpił nieoczekiwany błąd";
-    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
+    // eslint-disable-next-line no-console
+    console.error("Unexpected error in journal API:", error);
+
+    if (error instanceof Error) {
+      return new Response(
+        JSON.stringify({
+          error: "Wystąpił nieoczekiwany błąd",
+          message: error.message,
+          stack: error.stack,
+        }),
+        { status: 500 }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({
+        error: "Wystąpił nieoczekiwany błąd",
+        message: String(error),
+      }),
+      { status: 500 }
+    );
   }
 };
