@@ -135,139 +135,187 @@ const getCurrentStage = (entries: number) => {
 };
 
 const currentStage = getCurrentStage(totalEntries || 0);
+
+// Mood emoji mapping
+const moodEmojiMap: Record<string, string> = {
+  happy: "😊",
+  sad: "😢",
+  angry: "😠",
+  anxious: "😰",
+  peaceful: "😌",
+  grateful: "🙏",
+};
 ---
 
 <Layout title="Progress - VERANIMA">
-  <div class="progress-container">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 min-h-screen">
     <!-- Hero Section -->
-    <section class="hero-section">
-      <h1>📊 Your Transformation Journey</h1>
-      <p class="subtitle">Track your liberation and growth</p>
+    <section class="text-center mb-12">
+      <h1 class="text-4xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-3">
+        Twoja Statystyka
+      </h1>
+      <p class="text-slate-400 italic text-lg">Track your liberation and growth</p>
     </section>
 
-    <!-- Hero Stats -->
-    <section class="hero-stats">
-      <div class="hero-stat-card">
-        <div class="hero-stat-icon">📝</div>
-        <div class="hero-stat-value">{totalEntries || 0}</div>
-        <div class="hero-stat-label">Total Entries</div>
+    <!-- Hero Stats - Grid of Glass Cards -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div
+        class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 text-center transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-900/20"
+      >
+        <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
+          {totalEntries || 0}
+        </div>
+        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Total Entries</div>
       </div>
 
-      <div class="hero-stat-card">
-        <div class="hero-stat-icon">🔥</div>
-        <div class="hero-stat-value">{longestStreak}</div>
-        <div class="hero-stat-label">Longest Streak</div>
+      <div
+        class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 text-center transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-900/20"
+      >
+        <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
+          {longestStreak}
+        </div>
+        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Longest Streak</div>
       </div>
 
-      <div class="hero-stat-card">
-        <div class="hero-stat-icon">📅</div>
-        <div class="hero-stat-value">{totalDays}</div>
-        <div class="hero-stat-label">Total Days</div>
+      <div
+        class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 text-center transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-900/20"
+      >
+        <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
+          {totalDays}
+        </div>
+        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Total Days</div>
       </div>
 
-      <div class="hero-stat-card">
-        <div class="hero-stat-icon">🐉</div>
-        <div class="hero-stat-value">{totalTransmutations || 0}</div>
-        <div class="hero-stat-label">Transmutations</div>
+      <div
+        class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 text-center transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-900/20"
+      >
+        <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
+          {totalTransmutations || 0}
+        </div>
+        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Transmutations</div>
       </div>
     </section>
 
     <!-- Current Stage -->
-    <section class="stage-section">
-      <h2>🎭 Current Alchemical Stage</h2>
-      <div class="stage-card" style={`border-left: 6px solid ${currentStage.color};`}>
-        <div class="stage-emoji">{currentStage.emoji}</div>
-        <div class="stage-content">
-          <h3 class="stage-name">{currentStage.name}</h3>
-          <p class="stage-description">{currentStage.description}</p>
-          <div class="stage-progress">
-            <div class="progress-bar-bg">
+    <section class="mb-12">
+      <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
+        🎭 Current Alchemical Stage
+      </h2>
+      <div
+        class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-center"
+        style={`border-left: 6px solid ${currentStage.color};`}
+      >
+        <div class="text-6xl">{currentStage.emoji}</div>
+        <div class="flex-1 w-full">
+          <h3 class="text-2xl font-bold text-white mb-2">{currentStage.name}</h3>
+          <p class="text-slate-400 mb-4">{currentStage.description}</p>
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div class="flex-1 bg-slate-800 rounded-full h-3 overflow-hidden">
               <div
-                class="progress-bar-fill"
-                style={`width: ${Math.min((((totalEntries || 0) % 30) / 30) * 100, 100)}%; background: ${currentStage.color};`}
+                class="h-full bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 rounded-full transition-all duration-500"
+                style={`width: ${Math.min((((totalEntries || 0) % 30) / 30) * 100, 100)}%;`}
               >
               </div>
             </div>
-            <span class="progress-text">{(totalEntries || 0) % 30}/30 entries to next stage</span>
+            <span class="text-sm text-slate-500 whitespace-nowrap">
+              {(totalEntries || 0) % 30}/30 entries to next stage
+            </span>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Streak Calendar (Heatmap) -->
-    <section class="calendar-section">
-      <h2>🔥 Streak Calendar (Last 90 Days)</h2>
-      <div class="calendar-grid">
+    <section
+      class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 mb-12 shadow-lg shadow-purple-900/20"
+    >
+      <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
+        🔥 Streak Calendar (Last 90 Days)
+      </h2>
+      <div class="grid grid-cols-13 gap-1 mb-4">
         {
           Object.entries(heatmapData).map(([date, count]) => {
-            const intensity = count === 0 ? "empty" : count === 1 ? "low" : count === 2 ? "medium" : "high";
+            const intensity =
+              count === 0
+                ? "bg-slate-800/30"
+                : count === 1
+                  ? "bg-purple-600/40"
+                  : count === 2
+                    ? "bg-pink-600/60"
+                    : "bg-amber-500/80";
+            const textColor = count === 0 ? "text-slate-600" : "text-white";
 
             return (
               <div
-                class={`calendar-cell ${intensity}`}
+                class={`aspect-square rounded border border-white/5 flex items-center justify-center text-xs font-semibold cursor-pointer transition-all hover:scale-110 hover:border-white/20 ${intensity} ${textColor}`}
                 title={`${date}: ${count} ${count === 1 ? "entry" : "entries"}`}
                 data-date={date}
               >
-                <span class="cell-count">{count > 0 ? count : ""}</span>
+                <span>{count > 0 ? count : ""}</span>
               </div>
             );
           })
         }
       </div>
-      <div class="calendar-legend">
+      <div class="flex items-center justify-center gap-2 text-slate-400 text-sm">
         <span>Less</span>
-        <div class="legend-cell empty"></div>
-        <div class="legend-cell low"></div>
-        <div class="legend-cell medium"></div>
-        <div class="legend-cell high"></div>
+        <div class="w-4 h-4 rounded bg-slate-800/30 border border-white/5"></div>
+        <div class="w-4 h-4 rounded bg-purple-600/40 border border-white/5"></div>
+        <div class="w-4 h-4 rounded bg-pink-600/60 border border-white/5"></div>
+        <div class="w-4 h-4 rounded bg-amber-500/80 border border-white/5"></div>
         <span>More</span>
       </div>
     </section>
 
     <!-- Mood Trends -->
-    <section class="mood-trends-section">
-      <h2>🎭 Mood Distribution (Last 30 Days)</h2>
-      <div class="mood-chart-container">
+    <section
+      class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 mb-12 shadow-lg shadow-purple-900/20"
+    >
+      <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
+        🎭 Mood Distribution (Last 30 Days)
+      </h2>
+      <div class="flex flex-col gap-6">
         {
           Object.entries(moodCounts).length > 0 ? (
             Object.entries(moodCounts).map(([mood, count]) => {
               const percentage = ((count / (monthEntries?.length || 1)) * 100).toFixed(1);
-              const moodEmoji =
-                {
-                  happy: "😊",
-                  sad: "😢",
-                  angry: "😠",
-                  anxious: "😰",
-                  peaceful: "😌",
-                  grateful: "🙏",
-                }[mood] || "📝";
+              const moodEmoji = moodEmojiMap[mood] || "📝";
 
               return (
-                <div class="mood-bar-item">
-                  <div class="mood-info">
-                    <span class="mood-emoji-large">{moodEmoji}</span>
-                    <span class="mood-name-cap">{mood}</span>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div class="flex items-center gap-3 min-w-[150px]">
+                    <span class="text-3xl">{moodEmoji}</span>
+                    <span class="text-slate-300 font-semibold capitalize">{mood}</span>
                   </div>
-                  <div class="mood-bar-container">
-                    <div class="mood-bar-bg">
-                      <div class="mood-bar-fill-gradient" style={`width: ${percentage}%;`} />
+                  <div class="flex-1 flex items-center gap-4 w-full">
+                    <div class="flex-1 bg-slate-800 rounded-full h-8 overflow-hidden">
+                      <div
+                        class="h-full bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 rounded-full transition-all duration-500"
+                        style={`width: ${percentage}%;`}
+                      />
                     </div>
-                    <span class="mood-percentage">{percentage}%</span>
+                    <span class="text-slate-300 font-semibold min-w-[50px] text-right">{percentage}%</span>
                   </div>
                 </div>
               );
             })
           ) : (
-            <p class="empty-state">No mood data for the last 30 days. Start journaling! 🌱</p>
+            <p class="text-center py-8 text-slate-500">No mood data for the last 30 days. Start journaling! 🌱</p>
           )
         }
       </div>
     </section>
 
     <!-- Transformation Timeline -->
-    <section class="timeline-section">
-      <h2>⏳ Transformation Timeline</h2>
-      <div class="timeline">
+    <section
+      class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 mb-12 shadow-lg shadow-purple-900/20"
+    >
+      <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
+        ⏳ Transformation Timeline
+      </h2>
+      <div class="relative pl-8">
+        <div class="absolute left-2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-600 via-pink-600 to-amber-500">
+        </div>
         {
           allEntries && allEntries.length > 0 ? (
             allEntries
@@ -275,23 +323,15 @@ const currentStage = getCurrentStage(totalEntries || 0);
               .reverse()
               .map((entry) => {
                 const date = new Date(entry.created_at);
-                const moodEmoji =
-                  {
-                    happy: "😊",
-                    sad: "😢",
-                    angry: "😠",
-                    anxious: "😰",
-                    peaceful: "😌",
-                    grateful: "🙏",
-                  }[entry.mood] || "📝";
+                const moodEmoji = moodEmojiMap[entry.mood] || "📝";
 
                 return (
-                  <div class="timeline-item">
-                    <div class="timeline-dot" />
-                    <div class="timeline-content">
-                      <div class="timeline-header">
-                        <span class="timeline-emoji">{moodEmoji}</span>
-                        <span class="timeline-date">
+                  <div class="relative mb-8 last:mb-0">
+                    <div class="absolute -left-[34px] top-2 w-5 h-5 rounded-full bg-slate-950 border-2 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]" />
+                    <div class="bg-slate-800/50 backdrop-blur-sm border border-white/5 rounded-xl p-4 hover:bg-slate-800/70 transition-colors">
+                      <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">{moodEmoji}</span>
+                        <span class="text-slate-500 text-sm font-semibold">
                           {date.toLocaleDateString("pl-PL", {
                             day: "numeric",
                             month: "short",
@@ -299,31 +339,41 @@ const currentStage = getCurrentStage(totalEntries || 0);
                           })}
                         </span>
                       </div>
-                      <p class="timeline-text">{entry.content.slice(0, 100)}...</p>
+                      <p class="text-slate-300 leading-relaxed">{entry.content.slice(0, 100)}...</p>
                     </div>
                   </div>
                 );
               })
           ) : (
-            <p class="empty-state">Your journey begins here. Write your first entry! 🌱</p>
+            <p class="text-center py-8 text-slate-500">Your journey begins here. Write your first entry! 🌱</p>
           )
         }
       </div>
     </section>
 
     <!-- Monthly Stats -->
-    <section class="monthly-stats-section">
-      <h2>📈 This Month's Overview</h2>
-      <div class="monthly-grid">
-        <div class="monthly-card">
-          <div class="monthly-icon">📝</div>
-          <div class="monthly-value">{monthEntries?.length || 0}</div>
-          <div class="monthly-label">Entries This Month</div>
+    <section
+      class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 shadow-lg shadow-purple-900/20"
+    >
+      <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
+        📈 This Month's Overview
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div
+          class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 text-center transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-900/20"
+        >
+          <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
+            {monthEntries?.length || 0}
+          </div>
+          <div class="text-xs text-amber-500/80 tracking-widest uppercase">Entries This Month</div>
         </div>
-        <div class="monthly-card">
-          <div class="monthly-icon">🎯</div>
-          <div class="monthly-value">{(monthEntries?.length || 0) >= 20 ? "✅" : "⏳"}</div>
-          <div class="monthly-label">Monthly Goal (20)</div>
+        <div
+          class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 text-center transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-900/20"
+        >
+          <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
+            {(monthEntries?.length || 0) >= 20 ? "✅" : "⏳"}
+          </div>
+          <div class="text-xs text-amber-500/80 tracking-widest uppercase">Monthly Goal (20)</div>
         </div>
       </div>
     </section>
@@ -331,383 +381,13 @@ const currentStage = getCurrentStage(totalEntries || 0);
 </Layout>
 
 <style>
-  .progress-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: linear-gradient(180deg, #f7fafc 0%, #edf2f7 100%);
-    min-height: 100vh;
-  }
-
-  /* Hero Section */
-  .hero-section {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-  }
-
-  .subtitle {
-    color: #718096;
-    font-size: 1.2rem;
-  }
-
-  h2 {
-    font-size: 1.75rem;
-    color: #2d3748;
-    margin-bottom: 1.5rem;
-  }
-
-  /* Hero Stats */
-  .hero-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-  }
-
-  .hero-stat-card {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s;
-  }
-
-  .hero-stat-card:hover {
-    transform: translateY(-4px);
-  }
-
-  .hero-stat-icon {
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .hero-stat-value {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #667eea;
-    line-height: 1;
-  }
-
-  .hero-stat-label {
-    color: #718096;
-    font-size: 0.95rem;
-    margin-top: 0.5rem;
-  }
-
-  /* Current Stage */
-  .stage-section {
-    margin-bottom: 3rem;
-  }
-
-  .stage-card {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-  }
-
-  .stage-emoji {
-    font-size: 4rem;
-  }
-
-  .stage-content {
-    flex: 1;
-  }
-
-  .stage-name {
-    font-size: 1.75rem;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-  }
-
-  .stage-description {
-    color: #718096;
-    margin-bottom: 1rem;
-  }
-
-  .stage-progress {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .progress-bar-bg {
-    flex: 1;
-    height: 12px;
-    background: #e2e8f0;
-    border-radius: 1rem;
-    overflow: hidden;
-  }
-
-  .progress-bar-fill {
-    height: 100%;
-    border-radius: 1rem;
-    transition: width 0.5s ease;
-  }
-
-  .progress-text {
-    font-size: 0.85rem;
-    color: #718096;
-    white-space: nowrap;
-  }
-
-  /* Calendar Heatmap */
-  .calendar-section {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin-bottom: 3rem;
-  }
-
-  .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(13, 1fr);
-    gap: 4px;
-    margin-bottom: 1rem;
-  }
-
-  .calendar-cell {
-    aspect-ratio: 1;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .calendar-cell:hover {
-    transform: scale(1.1);
-  }
-
-  .calendar-cell.empty {
-    background: #edf2f7;
-  }
-
-  .calendar-cell.low {
-    background: #c3dafe;
-    color: #2c5282;
-  }
-
-  .calendar-cell.medium {
-    background: #667eea;
-    color: white;
-  }
-
-  .calendar-cell.high {
-    background: #764ba2;
-    color: white;
-  }
-
-  .calendar-legend {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    color: #718096;
-    font-size: 0.85rem;
-  }
-
-  .legend-cell {
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-  }
-
-  /* Mood Trends */
-  .mood-trends-section {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin-bottom: 3rem;
-  }
-
-  .mood-chart-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .mood-bar-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .mood-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 150px;
-  }
-
-  .mood-emoji-large {
-    font-size: 2rem;
-  }
-
-  .mood-name-cap {
-    font-weight: 600;
-    color: #2d3748;
-    text-transform: capitalize;
-  }
-
-  .mood-bar-container {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .mood-bar-bg {
-    flex: 1;
-    height: 32px;
-    background: #f7fafc;
-    border-radius: 0.5rem;
-    overflow: hidden;
-  }
-
-  .mood-bar-fill-gradient {
-    height: 100%;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 0.5rem;
-    transition: width 0.5s ease;
-  }
-
-  .mood-percentage {
-    font-weight: 600;
-    color: #2d3748;
-    min-width: 50px;
-  }
-
-  /* Timeline */
-  .timeline-section {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin-bottom: 3rem;
-  }
-
-  .timeline {
-    position: relative;
-    padding-left: 2rem;
-  }
-
-  .timeline::before {
-    content: "";
-    position: absolute;
-    left: 8px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg, #667eea, #764ba2);
-  }
-
-  .timeline-item {
-    position: relative;
-    margin-bottom: 2rem;
-  }
-
-  .timeline-dot {
-    position: absolute;
-    left: -2rem;
-    top: 8px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: white;
-    border: 3px solid #667eea;
-  }
-
-  .timeline-content {
-    background: #f7fafc;
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-  }
-
-  .timeline-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .timeline-emoji {
-    font-size: 1.5rem;
-  }
-
-  .timeline-date {
-    color: #718096;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .timeline-text {
-    color: #2d3748;
-    line-height: 1.6;
-  }
-
-  /* Monthly Stats */
-  .monthly-stats-section {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-
-  .monthly-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .monthly-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 0.75rem;
-    padding: 2rem;
-    text-align: center;
-    color: white;
-  }
-
-  .monthly-icon {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .monthly-value {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-  }
-
-  .monthly-label {
-    font-size: 0.9rem;
-    opacity: 0.9;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 2rem;
-    color: #a0aec0;
+  .grid-cols-13 {
+    grid-template-columns: repeat(13, minmax(0, 1fr));
   }
 
   @media (max-width: 768px) {
-    .calendar-grid {
-      grid-template-columns: repeat(7, 1fr);
+    .grid-cols-13 {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
     }
   }
 </style>
