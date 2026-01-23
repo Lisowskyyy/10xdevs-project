@@ -66,31 +66,43 @@ const moods = [
 ---
 
 <Layout title="Dziennik - VERANIMA">
-  <div class="journal-container min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+  <div class="journal-container min-h-screen bg-slate-950 p-6">
     <!-- Nagłówek -->
     <header class="journal-header text-center mb-8">
-      <h1 class="text-4xl font-bold text-gray-800 mb-2">Dziennik Emocji</h1>
-      <p class="text-gray-600">Zapisz swoje myśli i uczucia</p>
+      <h1
+        class="text-4xl font-serif font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500"
+      >
+        Dziennik Emocji
+      </h1>
+      <p class="text-slate-300">Zapisz swoje myśli i uczucia</p>
     </header>
 
     <!-- Komunikaty -->
     {
       successMessage && (
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">{successMessage}</div>
+        <div class="max-w-2xl mx-auto mb-6 bg-green-900/30 border border-green-500/50 text-green-300 px-4 py-3 rounded-lg backdrop-blur-sm">
+          {successMessage}
+        </div>
       )
     }
 
     {
       errorMessage && (
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">{errorMessage}</div>
+        <div class="max-w-2xl mx-auto mb-6 bg-red-900/30 border border-red-500/50 text-red-300 px-4 py-3 rounded-lg backdrop-blur-sm">
+          {errorMessage}
+        </div>
       )
     }
 
     <!-- Formularz dodawania wpisu -->
     <div class="max-w-2xl mx-auto mb-8">
-      <form id="journal-form" method="POST" class="bg-white rounded-lg shadow-lg p-6">
+      <form
+        id="journal-form"
+        method="POST"
+        class="bg-gradient-to-br from-slate-900 to-slate-800 border border-[#d4af37]/20 rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.5)] p-6"
+      >
         <div class="mb-4">
-          <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
+          <label for="content" class="block text-sm font-medium text-slate-300 mb-2">
             Jak się czujesz? Opisz swoje myśli i uczucia:
           </label>
           <textarea
@@ -98,22 +110,22 @@ const moods = [
             name="content"
             rows="6"
             maxlength="2000"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            class="w-full px-3 py-2 bg-slate-950/50 border border-slate-700 rounded-md text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#d4af37]/50 focus:border-[#d4af37]/50 transition-all"
             placeholder="Napisz o swoim dniu, uczuciach, przemyśleniach..."
             aria-describedby="content-help"
             required></textarea>
-          <div id="content-help" class="text-sm text-gray-500 mt-1">
+          <div id="content-help" class="text-sm text-slate-400 mt-1">
             <span id="char-count">0</span>/2000 znaków
           </div>
         </div>
 
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">Wybierz nastrój:</label>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Wybierz nastrój:</label>
           <div class="grid grid-cols-3 gap-3">
             {
               moods.map((mood) => (
                 <label
-                  class="mood-option flex items-center justify-center p-3 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-all focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2"
+                  class="mood-option flex items-center justify-center p-3 border-2 border-slate-700 rounded-lg cursor-pointer hover:border-[#d4af37]/50 hover:bg-slate-800/50 transition-all focus-within:ring-2 focus-within:ring-[#d4af37]/50"
                   tabindex="0"
                 >
                   <input
@@ -126,7 +138,7 @@ const moods = [
                   />
                   <div class="text-center">
                     <div class="text-2xl mb-1">{mood.emoji}</div>
-                    <div class="text-sm text-gray-600">{mood.label}</div>
+                    <div class="text-sm text-slate-300">{mood.label}</div>
                   </div>
                 </label>
               ))
@@ -136,7 +148,7 @@ const moods = [
 
         <button
           type="submit"
-          class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+          class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-slate-900 font-bold py-2 px-4 rounded-md hover:shadow-[0_0_20px_rgba(251,191,36,0.4)] focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-slate-800 transition-all"
         >
           Zapisz wpis
         </button>
@@ -146,7 +158,11 @@ const moods = [
 
     <!-- Lista wpisów -->
     <div class="max-w-4xl mx-auto">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-6">Ostatnie wpisy</h2>
+      <h2
+        class="text-2xl font-serif font-semibold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500"
+      >
+        Ostatnie wpisy
+      </h2>
 
       {
         entries && entries.length > 0 ? (
@@ -154,13 +170,13 @@ const moods = [
             {entries.map((entry) => {
               const moodData = moods.find((m) => m.value === entry.mood);
               return (
-                <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 border border-[#d4af37]/20 rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.5)] p-6">
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center space-x-3">
                       <span class="text-2xl" role="img" aria-label={`Nastrój: ${moodData?.label || "Neutralny"}`}>
                         {moodData?.emoji || "😐"}
                       </span>
-                      <time class="text-sm text-gray-500" datetime={entry.created_at}>
+                      <time class="text-sm text-slate-400" datetime={entry.created_at}>
                         {new Date(entry.created_at).toLocaleDateString("pl-PL", {
                           year: "numeric",
                           month: "long",
@@ -170,11 +186,11 @@ const moods = [
                         })}
                       </time>
                     </div>
-                    <span class="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                    <span class="text-sm text-slate-300 bg-slate-800/50 px-2 py-1 rounded border border-slate-700">
                       {moodData?.label || "Neutralny"}
                     </span>
                   </div>
-                  <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{entry.content}</p>
+                  <p class="text-slate-300 leading-relaxed whitespace-pre-wrap">{entry.content}</p>
                 </div>
               );
             })}
@@ -182,8 +198,8 @@ const moods = [
         ) : (
           <div class="text-center py-12">
             <div class="text-6xl mb-4">📝</div>
-            <h3 class="text-xl text-gray-600 mb-2">Brak wpisów</h3>
-            <p class="text-gray-500">Zacznij pisać swój dziennik emocji!</p>
+            <h3 class="text-xl text-slate-300 mb-2">Brak wpisów</h3>
+            <p class="text-slate-400">Zacznij pisać swój dziennik emocji!</p>
           </div>
         )
       }
@@ -194,15 +210,15 @@ const moods = [
 <style>
   /* Style dla aktywnego mood option */
   .mood-option:has(input:checked) {
-    background-color: #eef2ff;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    background-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.6);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
   }
 
   .mood-option.active {
-    background-color: #eef2ff;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    background-color: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.6);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
   }
 </style>
 
