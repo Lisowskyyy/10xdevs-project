@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 export const POST: APIRoute = async ({ request }) => {
   try {
     const body = await request.json();
+    console.log("DEBUG: Otrzymano body:", body);
     const { text, userId } = body;
 
     if (!text) return new Response(JSON.stringify({ error: "Pusty wpis" }), { status: 400 });
