@@ -15,8 +15,8 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
       <form id="signupForm" class="signup-form" data-supabase-url={supabaseUrl} data-supabase-key={supabaseAnonKey}>
         <div class="input-group">
-          <label for="displayName">Display Name (optional)</label>
-          <input type="text" id="displayName" name="displayName" placeholder="Your name" />
+          <label for="display_name">Display Name (optional)</label>
+          <input type="text" id="display_name" name="display_name" placeholder="Your name" />
         </div>
 
         <div class="input-group">
@@ -30,8 +30,8 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         </div>
 
         <div class="input-group">
-          <label for="confirmPassword">Confirm Password</label>
-          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required />
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" name="confirm-password" placeholder="••••••••" required />
         </div>
 
         <button type="submit" class="btn-primary">Create Account</button>
@@ -156,13 +156,12 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   }
 </style>
 
-<script>
+<script type="module">
+  // eslint-disable-next-line
+  import { createClient } from "@supabase/supabase-js";
+
   document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("signupForm");
-    const displayNameInput = document.getElementById("displayName");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const confirmPasswordInput = document.getElementById("confirmPassword");
 
     if (form) {
       form.addEventListener("submit", async function (e) {
@@ -174,10 +173,17 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         const clientSupabaseUrl = formElement.dataset.supabaseUrl;
         const clientSupabaseKey = formElement.dataset.supabaseKey;
 
-        const displayName = displayNameInput ? displayNameInput.value.trim() : "";
-        const email = emailInput ? emailInput.value.trim() : "";
-        const password = passwordInput ? passwordInput.value : "";
-        const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : "";
+        if (!clientSupabaseUrl || !clientSupabaseKey) {
+          alert("Configuration error. Please contact support.");
+          return;
+        }
+
+        // Get form values using FormData
+        const formData = new FormData(formElement);
+        const email = formData.get("email")?.toString().trim() || "";
+        const password = formData.get("password")?.toString() || "";
+        const confirmPassword = formData.get("confirm-password")?.toString() || "";
+        const displayName = formData.get("display_name")?.toString().trim() || "";
 
         // Validation
         if (!email || !password || !confirmPassword) {
@@ -195,13 +201,7 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
           return;
         }
 
-        if (!clientSupabaseUrl || !clientSupabaseKey) {
-          alert("Configuration error. Please contact support.");
-          return;
-        }
-
         try {
-          const { createClient } = await import("@supabase/supabase-js");
           const supabase = createClient(clientSupabaseUrl, clientSupabaseKey);
 
           // Sign up the user
@@ -210,7 +210,7 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
             password: password,
             options: {
               data: {
-                display_name: displayName || email.split("@")[0],
+                first_name: displayName || email.split("@")[0],
               },
             },
           });
@@ -221,8 +221,8 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
           }
 
           if (data.user) {
-            alert("Account created! Welcome to VERANIMA!");
-            window.location.href = "/user";
+            alert("Account created! Check email.");
+            window.location.href = "/login";
           }
         } catch {
           // Handle error without console statement
