@@ -14,6 +14,8 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       <p class="tagline">Begin your liberation journey.</p>
 
       <form id="signupForm" class="signup-form" data-supabase-url={supabaseUrl} data-supabase-key={supabaseAnonKey}>
+        <div id="error-message" class="error-message" style="display: none;"></div>
+
         <div class="input-group">
           <label for="display_name">Display Name (optional)</label>
           <input type="text" id="display_name" name="display_name" placeholder="Your name" />
@@ -154,81 +156,86 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   .login-link a:hover {
     text-decoration: underline;
   }
+
+  .error-message {
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: #fca5a5;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
 </style>
 
-<script type="module">
-  // eslint-disable-next-line
+<script>
+  /* eslint-disable */
   import { createClient } from "@supabase/supabase-js";
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("signupForm");
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    if (form) {
-      form.addEventListener("submit", async function (e) {
-        e.preventDefault();
+  const form = document.querySelector("form");
+  const errorMessage = document.getElementById("error-message");
 
-        const formElement = e.target;
-        if (!formElement) return;
-
-        const clientSupabaseUrl = formElement.dataset.supabaseUrl;
-        const clientSupabaseKey = formElement.dataset.supabaseKey;
-
-        if (!clientSupabaseUrl || !clientSupabaseKey) {
-          alert("Configuration error. Please contact support.");
-          return;
-        }
-
-        // Get form values using FormData
-        const formData = new FormData(formElement);
-        const email = formData.get("email")?.toString().trim() || "";
-        const password = formData.get("password")?.toString() || "";
-        const confirmPassword = formData.get("confirm-password")?.toString() || "";
-        const displayName = formData.get("display_name")?.toString().trim() || "";
-
-        // Validation
-        if (!email || !password || !confirmPassword) {
-          alert("Please fill in all required fields");
-          return;
-        }
-
-        if (password !== confirmPassword) {
-          alert("Passwords do not match");
-          return;
-        }
-
-        if (password.length < 6) {
-          alert("Password must be at least 6 characters");
-          return;
-        }
-
-        try {
-          const supabase = createClient(clientSupabaseUrl, clientSupabaseKey);
-
-          // Sign up the user
-          const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-              data: {
-                first_name: displayName || email.split("@")[0],
-              },
-            },
-          });
-
-          if (error) {
-            alert("Signup failed: " + error.message);
-            return;
-          }
-
-          if (data.user) {
-            alert("Account created! Check email.");
-            window.location.href = "/login";
-          }
-        } catch {
-          // Handle error without console statement
-          alert("An unexpected error occurred. Please try again.");
-        }
-      });
+  /**
+   * @param {string} message - Error message to display
+   * @returns {void}
+   */
+  // @ts-ignore - JSDoc provides type information
+  function showError(message) {
+    if (errorMessage) {
+      errorMessage.innerText = message;
+      errorMessage.style.display = "block";
     }
-  });
+  }
+
+  function hideError() {
+    if (errorMessage) {
+      errorMessage.style.display = "none";
+      errorMessage.innerText = "";
+    }
+  }
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hideError();
+
+      const formData = new FormData(form);
+      const email = formData.get("email")?.toString();
+      const password = formData.get("password")?.toString();
+      const confirmPassword = formData.get("confirm-password")?.toString();
+      const displayName = formData.get("display_name")?.toString();
+
+      if (!email || !password || !confirmPassword) {
+        showError("All fields are required.");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showError("Passwords do not match.");
+        return;
+      }
+
+      // Rejestracja
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: displayName || "",
+          },
+        },
+      });
+
+      if (error) {
+        showError(error.message);
+      } else {
+        alert("Account created! Redirecting to login...");
+        window.location.href = "/login";
+      }
+    });
+  }
 </script>
