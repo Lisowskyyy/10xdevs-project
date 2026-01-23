@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import GratitudeJournal from "../components/GratitudeJournal.astro";
 import { createServerSupabaseClient } from "../lib/supabase";
 
 const supabase = createServerSupabaseClient(Astro.cookies);
@@ -49,6 +50,13 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
             <p class="tagline">Continue your liberation journey.</p>
           </div>
           <a href="/profile" class="edit-profile-btn">Edit Profile</a>
+        </div>
+      </section>
+
+      <!-- Gratitude Journal - Main Feature -->
+      <section class="journal-section">
+        <div class="journal-container">
+          <GratitudeJournal />
         </div>
       </section>
 
@@ -180,6 +188,16 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
 
   .welcome-section {
     margin-bottom: 3rem;
+  }
+
+  .journal-section {
+    margin-bottom: 3rem;
+  }
+
+  .journal-container {
+    max-width: 56rem; /* max-w-4xl equivalent */
+    margin: 0 auto;
+    padding: 0 1rem;
   }
 
   .welcome-header {
