@@ -85,7 +85,7 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
               user.user_metadata?.avatar_url ? (
                 <img src={user.user_metadata.avatar_url} alt="Avatar" class="avatar-image" />
               ) : (
-                <div class="avatar-placeholder">🧘‍♂️</div>
+                <img src="/avatar.png" alt="Default Profile" class="avatar-image" />
               )
             }
           </div>
