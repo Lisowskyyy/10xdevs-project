@@ -55,7 +55,7 @@ export default function AIInsightButton({ journalEntry, userStage }: Props) {
         ) : (
           <>
             <span className="sparkle">✨</span>
-            <span>Uzyskaj AI Insight</span>
+            <span>Wgłębij się w swoje myśli z Veranimą</span>
           </>
         )}
       </button>
