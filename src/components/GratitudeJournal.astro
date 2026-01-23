@@ -30,7 +30,13 @@ const { userId } = Astro.props;
     </div>
 
     <div class="gratitude-submit-wrapper">
-      <button type="submit" class="gratitude-submit-btn">Zapisz i Poczuj ✨</button>
+      <button type="submit" class="gratitude-submit-btn" id="submitBtn">
+        <span class="btn-text">Zapisz i Poczuj ✨</span>
+        <span class="btn-loading" style="display: none;">
+          <span class="loader-spinner-small"></span>
+          <span>Analizuję...</span>
+        </span>
+      </button>
     </div>
   </form>
 
@@ -107,10 +113,14 @@ const { userId } = Astro.props;
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 0.75rem;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(4px);
+  }
+
+  .gratitude-loader:not(.hidden) {
+    display: flex;
   }
 
   .loader-content {
@@ -180,6 +190,27 @@ const { userId } = Astro.props;
     transform: translateY(0);
   }
 
+  .gratitude-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .loader-spinner-small {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(10, 10, 15, 0.3);
+    border-top-color: #0a0a0f;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
   .gratitude-ai-response {
     margin-top: 2rem;
     transition: opacity 0.7s ease;
@@ -235,18 +266,19 @@ const { userId } = Astro.props;
     const loader = document.getElementById("loader");
     const aiResponse = document.getElementById("aiResponse");
     const aiText = document.getElementById("aiText");
+    const submitBtn = document.getElementById("submitBtn");
+    const entryElement = document.getElementById("journalEntry");
 
     if (form && form instanceof HTMLFormElement) {
-      form.addEventListener("submit", (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const entryElement = document.getElementById("journalEntry");
-        const entry = entryElement && entryElement instanceof HTMLTextAreaElement ? entryElement.value : "";
 
-        // UI: Pokaż loader
-        if (loader) loader.classList.remove("hidden");
-        if (aiResponse) {
-          aiResponse.classList.add("hidden");
-          aiResponse.classList.remove("opacity-100");
+        const entry = entryElement && entryElement instanceof HTMLTextAreaElement ? entryElement.value.trim() : "";
+
+        // Validate entry is not empty
+        if (!entry) {
+          alert("Proszę wpisać treść wpisu.");
+          return;
         }
 
         // Wywołanie naszego Endpointu API
@@ -254,39 +286,61 @@ const { userId } = Astro.props;
         const userId = form.dataset.userId;
         if (!userId) {
           alert("Błąd: Brak identyfikatora użytkownika.");
-          if (loader) loader.classList.add("hidden");
           return;
         }
 
-        fetch("/api/journal", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: entry, userId: userId }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              // UI: Sukces
-              if (aiText) aiText.textContent = `"${data.aiResponse}"`;
-              if (aiResponse) {
-                aiResponse.classList.remove("hidden");
-                // Małe opóźnienie dla efektu fade-in
-                setTimeout(() => {
-                  aiResponse.classList.add("opacity-100");
-                }, 50);
-              }
-              form.reset();
-            } else {
-              alert("Coś poszło nie tak: " + (data.error || "Błąd nieznany"));
-            }
-          })
-          .catch(() => {
-            // Error handling - user-friendly message
-            alert("Błąd połączenia z Veranimą.");
-          })
-          .finally(() => {
-            if (loader) loader.classList.add("hidden");
+        // Set loading state: disable button, show loader overlay, show button loading state
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          const btnTextEl = submitBtn.querySelector(".btn-text");
+          const btnLoadingEl = submitBtn.querySelector(".btn-loading");
+          if (btnTextEl && btnTextEl instanceof HTMLElement) btnTextEl.style.display = "none";
+          if (btnLoadingEl && btnLoadingEl instanceof HTMLElement) btnLoadingEl.style.display = "flex";
+        }
+
+        if (loader) loader.classList.remove("hidden");
+        if (aiResponse) {
+          aiResponse.classList.add("hidden");
+          aiResponse.classList.remove("opacity-100");
+        }
+
+        try {
+          const res = await fetch("/api/journal", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: entry, userId: userId }),
           });
+
+          const data = await res.json();
+
+          if (data.success) {
+            // UI: Sukces
+            if (aiText) aiText.textContent = `"${data.aiResponse}"`;
+            if (aiResponse) {
+              aiResponse.classList.remove("hidden");
+              // Małe opóźnienie dla efektu fade-in
+              setTimeout(() => {
+                aiResponse.classList.add("opacity-100");
+              }, 50);
+            }
+            form.reset();
+          } else {
+            alert("Coś poszło nie tak: " + (data.error || "Błąd nieznany"));
+          }
+        } catch {
+          // Error handling - user-friendly message
+          alert("Błąd połączenia z Veranimą.");
+        } finally {
+          // Reset loading state: hide loader overlay, restore button state
+          if (loader) loader.classList.add("hidden");
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            const btnTextEl = submitBtn.querySelector(".btn-text");
+            const btnLoadingEl = submitBtn.querySelector(".btn-loading");
+            if (btnTextEl && btnTextEl instanceof HTMLElement) btnTextEl.style.display = "inline";
+            if (btnLoadingEl && btnLoadingEl instanceof HTMLElement) btnLoadingEl.style.display = "none";
+          }
+        }
       });
     }
   });
