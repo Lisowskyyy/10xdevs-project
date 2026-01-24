@@ -43,25 +43,35 @@ begin
     end if;
   end if;
 
-  -- Insert new profile record
-  insert into public.profiles (
-    id,
-    imie,
-    nazwisko,
-    created_at,
-    updated_at
-  )
-  values (
-    new.id,
-    first_name,
-    last_name,
-    now(),
-    now()
-  );
+  -- Insert new profile record with exception handling
+  -- This prevents registration failures if profile creation fails
+  begin
+    insert into public.profiles (
+      id,
+      imie,
+      nazwisko,
+      created_at,
+      updated_at
+    )
+    values (
+      new.id,
+      first_name,
+      last_name,
+      now(),
+      now()
+    );
 
-  -- Log the creation for debugging
-  raise log 'Created profile for user %: first_name=%, last_name=%, full_name=%',
-    new.id, first_name, last_name, full_name;
+    -- Log successful creation
+    raise log 'Created profile for user %: first_name=%, last_name=%, full_name=%',
+      new.id, first_name, last_name, full_name;
+
+  exception when others then
+    -- Log the error but DON'T block user registration
+    raise warning 'Error creating profile for user %: % (SQLSTATE: %)',
+      new.id, sqlerrm, sqlstate;
+    raise log 'Profile creation failed for user %, but user registration will continue',
+      new.id;
+  end;
 
   return new;
 end;
@@ -127,24 +137,31 @@ begin
       end if;
     end if;
 
-    -- Insert profile for existing user
-    insert into public.profiles (
-      id,
-      imie,
-      nazwisko,
-      created_at,
-      updated_at
-    )
-    values (
-      user_record.id,
-      first_name,
-      last_name,
-      now(),
-      now()
-    );
+    -- Insert profile for existing user with exception handling
+    begin
+      insert into public.profiles (
+        id,
+        imie,
+        nazwisko,
+        created_at,
+        updated_at
+      )
+      values (
+        user_record.id,
+        first_name,
+        last_name,
+        now(),
+        now()
+      );
 
-    raise log 'Backfilled profile for existing user %: first_name=%, last_name=%',
-      user_record.id, first_name, last_name;
+      raise log 'Backfilled profile for existing user %: first_name=%, last_name=%',
+        user_record.id, first_name, last_name;
+
+    exception when others then
+      -- Log the error but continue processing other users
+      raise warning 'Error backfilling profile for existing user %: % (SQLSTATE: %)',
+        user_record.id, sqlerrm, sqlstate;
+    end;
   end loop;
 end;
 $$;
