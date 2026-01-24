@@ -683,9 +683,6 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
 </style>
 
 <script>
-  import { supabase } from "../lib/supabase";
-  import { updateUserProfile } from "../lib/identity";
-
   document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("profile-form") as HTMLFormElement;
     const updateBtn = document.getElementById("update-btn") as HTMLButtonElement;
@@ -717,11 +714,23 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
       statusMessage.classList.add("hidden");
 
       try {
-        // Update profile using the identity service
-        await updateUserProfile(supabase, {
-          firstName: firstName,
-          lastName: lastName,
+        // Update profile via API endpoint (server-side handles session)
+        const response = await fetch("/api/profile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: firstName,
+            lastName: lastName,
+          }),
         });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to update profile");
+        }
 
         // Show success message
         statusMessage.textContent = "Profil został zaktualizowany!";
