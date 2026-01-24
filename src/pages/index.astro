@@ -29,7 +29,11 @@ if (session) {
     class="min-h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
   >
     <div class="absolute inset-0 z-0">
-      <div class="absolute inset-0" style="background-image: url('/veranima_background.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+      <div
+        class="absolute inset-0"
+        style="background-image: url('/veranima_background.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+      >
+      </div>
       <div class="bg-slate-950/70 absolute inset-0"></div>
     </div>
 
@@ -64,14 +68,15 @@ if (session) {
   </section>
 
   <!-- Gratitude Section -->
-  <section
-    id="gratitude"
-    class="h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
-  >
-    <div class="absolute inset-0 z-0 bg-gradient-to-b from-indigo-900 via-violet-900 to-purple-900"></div>
+  <section id="gratitude" class="h-screen flex items-center px-4 relative overflow-hidden snap-start">
+    <div
+      class="absolute inset-0 z-0"
+      style="background-image: url('/journal.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+    >
+    </div>
+    <div class="absolute inset-0 z-0 bg-slate-950/70"></div>
 
-    <div class="relative z-10 max-w-3xl">
-      <div class="text-8xl mb-8 animate-glow">📖</div>
+    <div class="relative z-10 max-w-lg ml-16">
       <h2
         class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-200 to-indigo-300 mb-6"
       >
@@ -86,11 +91,12 @@ if (session) {
   </section>
 
   <!-- Dracarys Section -->
-  <section
-    id="dracarys"
-    class="h-screen flex items-center px-4 relative overflow-hidden snap-start"
-  >
-    <div class="absolute inset-0 z-0" style="background-image: url('/dracarys.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+  <section id="dracarys" class="h-screen flex items-center px-4 relative overflow-hidden snap-start">
+    <div
+      class="absolute inset-0 z-0"
+      style="background-image: url('/dracarys.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+    >
+    </div>
     <div class="absolute inset-0 z-0 bg-slate-950/60"></div>
 
     <div class="relative z-10 flex-1 ml-auto max-w-md mr-16">
@@ -108,14 +114,15 @@ if (session) {
   </section>
 
   <!-- Meditation Section -->
-  <section
-    id="meditation"
-    class="h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
-  >
-    <div class="absolute inset-0 z-0 bg-gradient-to-b from-teal-900 via-cyan-900 to-blue-900"></div>
+  <section id="meditation" class="h-screen flex items-center px-4 relative overflow-hidden snap-start">
+    <div
+      class="absolute inset-0 z-0"
+      style="background-image: url('/circles.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+    >
+    </div>
+    <div class="absolute inset-0 z-0 bg-slate-950/70"></div>
 
-    <div class="relative z-10 max-w-3xl">
-      <div class="text-8xl mb-8 lotus-icon">🧘‍♂️</div>
+    <div class="relative z-10 flex-1 ml-auto max-w-md mr-16">
       <h2
         class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-cyan-300 mb-6"
       >
@@ -221,7 +228,6 @@ if (session) {
     filter: drop-shadow(0 0 30px rgba(94, 234, 212, 0.6));
     transform: scale(1.1);
   }
-
 
   /* Responsive adjustments */
   @media (max-width: 768px) {
