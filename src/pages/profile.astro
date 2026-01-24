@@ -23,6 +23,11 @@ if (Astro.request.method === "POST") {
     const firstName = formData.get("first_name")?.toString() || null;
     const lastName = formData.get("last_name")?.toString() || null;
 
+    // Check if this is the first time saving a name
+    const { data: existingProfile } = await supabase.from("profiles").select("first_name").eq("id", user.id).single();
+
+    const isFirstTimeNameSave = !existingProfile?.first_name && firstName;
+
     await supabase
       .from("profiles")
       .update({
@@ -32,6 +37,11 @@ if (Astro.request.method === "POST") {
       .eq("id", user.id);
 
     // Redirect to prevent form resubmission
+    // If this is the first time saving a name, redirect to dashboard with welcome flag
+    if (isFirstTimeNameSave) {
+      return Astro.redirect("/dashboard?welcome=true");
+    }
+
     return Astro.redirect("/profile");
   }
 
