@@ -48,12 +48,12 @@ export async function getUserProfile(supabase: any): Promise<UserProfile | null>
       };
     }
 
-    // Return formatted profile data
+    // Return formatted profile data - using Polish column names
     return {
       id: profile.id,
       email: session.user.email || "",
-      firstName: profile.first_name,
-      lastName: profile.last_name,
+      firstName: profile.imie,
+      lastName: profile.nazwisko,
       streakDays: profile.streak_days || 0,
       totalEntries: profile.total_entries || 0,
       totalCircles: profile.total_circles || 0,
@@ -86,13 +86,13 @@ export async function updateUserProfile(
       throw new Error("No authenticated session found");
     }
 
-    // Prepare update object for Supabase
+    // Prepare update object for Supabase - using Polish column names
     const updateData: any = {};
     if (updates.firstName !== undefined) {
-      updateData.first_name = updates.firstName;
+      updateData.imie = updates.firstName;
     }
     if (updates.lastName !== undefined) {
-      updateData.last_name = updates.lastName;
+      updateData.nazwisko = updates.lastName;
     }
 
     // Update the profile

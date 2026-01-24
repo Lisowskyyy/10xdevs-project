@@ -59,13 +59,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Prepare update object
+    // Prepare update object - using Polish column names
     const updateData: any = {};
     if (firstName !== undefined) {
-      updateData.first_name = firstName;
+      updateData.imie = firstName;
     }
     if (lastName !== undefined) {
-      updateData.last_name = lastName;
+      updateData.nazwisko = lastName;
     }
 
     // Update the profile
