@@ -59,6 +59,20 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
+    // 🔥 DIAGNOSTIC: Check actual column names in database
+    const { data: profileCheck, error: checkError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (profileCheck) {
+      console.log("🔥 RZECZYWISTE KOLUMNY W BAZIE:", Object.keys(profileCheck));
+      console.log("🔥 WARTOSCI W BAZIE:", profileCheck);
+    } else {
+      console.error("Błąd pobierania profilu dla diagnostyki:", checkError);
+    }
+
     // Prepare update object - using Polish column names
     const updateData: any = {};
     if (firstName !== undefined) {
