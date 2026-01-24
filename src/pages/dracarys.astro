@@ -57,16 +57,19 @@ const { data: burnedEntries } = await supabase
 ---
 
 <Layout title="Dracarys - VERANIMA">
-  <div class="dracarys-container">
+  <div class="min-h-screen bg-[url('/dracarys.png')] bg-cover bg-no-repeat bg-[center_top] relative text-white">
+    <!-- Background Overlay -->
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/60 to-slate-950/90 z-0"></div>
+
     <!-- Header -->
-    <header class="dracarys-header">
+    <header class="dracarys-header relative z-10">
       <div class="header-content">
         <a href="/dashboard" class="back-link">← Dashboard</a>
         <h1 class="page-title">Dracarys</h1>
       </div>
     </header>
 
-    <main class="dracarys-main">
+    <main class="dracarys-main relative z-10">
       <!-- Main Ritual Card -->
       <div class="ritual-card">
         <!-- Intro -->
@@ -174,33 +177,6 @@ const { data: burnedEntries } = await supabase
 </Layout>
 
 <style>
-  .dracarys-container {
-    min-height: 100vh;
-    background-image: url("/dracarys.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    color: white;
-    position: relative;
-  }
-
-  .dracarys-container::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(2, 6, 23, 0.8);
-    z-index: 0;
-  }
-
-  .dracarys-container > * {
-    position: relative;
-    z-index: 1;
-  }
-
   .dracarys-header {
     backdrop-filter: blur(10px);
     background: rgba(15, 23, 42, 0.5);

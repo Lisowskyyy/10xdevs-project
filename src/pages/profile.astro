@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { createServerSupabaseClient } from "../lib/supabase";
-import { updateUserProfile } from "../lib/identity";
+import { getUserProfile } from "../lib/identity";
 
 const supabase = createServerSupabaseClient(Astro.cookies);
 const {
@@ -14,52 +14,9 @@ if (!session) {
 
 const user = session.user;
 
-// --- HANDLE POST REQUESTS ---
-if (Astro.request.method === "POST") {
-  const formData = await Astro.request.formData();
-  const action = formData.get("action")?.toString();
-
-  // Update profile
-  if (action === "update_profile") {
-    const firstName = formData.get("first_name")?.toString() || null;
-    const lastName = formData.get("last_name")?.toString() || null;
-
-    // Check if this is the first time saving a name
-    const { data: existingProfile } = await supabase.from("profiles").select("first_name").eq("id", user.id).single();
-
-    const isFirstTimeNameSave = !existingProfile?.first_name && firstName;
-
-    // Use the centralized identity service to update profile
-    await updateUserProfile(supabase, {
-      firstName: firstName,
-      lastName: lastName,
-    });
-
-    // Redirect to prevent form resubmission
-    // If this is the first time saving a name, redirect to dashboard with welcome flag
-    if (isFirstTimeNameSave) {
-      return Astro.redirect("/dashboard?welcome=true");
-    }
-
-    return Astro.redirect("/profile");
-  }
-
-  // Delete meditation log
-  if (action === "delete_log") {
-    const logId = formData.get("log_id")?.toString();
-
-    if (logId) {
-      await supabase.from("meditation_logs").delete().eq("id", logId).eq("user_id", user.id);
-    }
-
-    // Redirect to prevent form resubmission
-    return Astro.redirect("/profile");
-  }
-}
-
 // --- FETCH DATA ---
-// Fetch user profile
-const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+// Fetch user profile using the centralized identity service
+const userProfile = await getUserProfile(supabase);
 
 // Fetch meditation logs
 const { data: logs } = await supabase
@@ -104,8 +61,18 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
         <h1 class="profile-title">Twój Profil</h1>
 
         <!-- Edit Profile Form -->
-        <form method="POST" class="profile-form">
-          <input type="hidden" name="action" value="update_profile" />
+        <form id="profile-form" class="profile-form">
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={userProfile?.email || ""}
+              readonly
+              class="form-input form-input-readonly"
+            />
+          </div>
 
           <div class="form-group">
             <label for="first_name" class="form-label">Imię</label>
@@ -113,7 +80,7 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
               type="text"
               id="first_name"
               name="first_name"
-              value={profile?.first_name || ""}
+              value={userProfile?.firstName || ""}
               placeholder="Wprowadź swoje imię"
               class="form-input"
             />
@@ -125,14 +92,20 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
               type="text"
               id="last_name"
               name="last_name"
-              value={profile?.last_name || ""}
+              value={userProfile?.lastName || ""}
               placeholder="Wprowadź swoje nazwisko"
               class="form-input"
             />
           </div>
 
+          <!-- Status Messages -->
+          <div id="status-message" class="status-message hidden"></div>
+
           <div class="form-actions">
-            <button type="submit" class="btn-update">Zaktualizuj profil</button>
+            <button type="submit" id="update-btn" class="btn-update">
+              <span id="btn-text">Zaktualizuj profil</span>
+              <span id="btn-spinner" class="btn-spinner hidden">⏳</span>
+            </button>
           </div>
         </form>
 
@@ -193,17 +166,15 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
                       <div class="log-actions">
                         <div class="log-duration">+{log.duration_minutes} min</div>
 
-                        <form
-                          method="POST"
-                          class="delete-form"
-                          onsubmit="return confirm('Are you sure you want to delete this entry?');"
+                        <button
+                          type="button"
+                          class="btn-delete"
+                          title="Delete entry"
+                          data-log-id={log.id}
+                          onclick="deleteMeditationLog(this)"
                         >
-                          <input type="hidden" name="action" value="delete_log" />
-                          <input type="hidden" name="log_id" value={log.id} />
-                          <button type="submit" class="btn-delete" title="Delete entry">
-                            🗑️
-                          </button>
-                        </form>
+                          🗑️
+                        </button>
                       </div>
                     </div>
                   );
@@ -648,4 +619,175 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
       justify-content: space-between;
     }
   }
+
+  /* Readonly Email Input */
+  .form-input-readonly {
+    background: rgba(71, 85, 105, 0.5);
+    color: rgba(148, 163, 184, 1);
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+
+  .form-input-readonly:focus {
+    border-color: rgb(30, 41, 59);
+    background: rgba(71, 85, 105, 0.5);
+    box-shadow: none;
+  }
+
+  /* Status Messages */
+  .status-message {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .status-message.status-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+  }
+
+  .status-message.status-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+  }
+
+  .status-message.hidden {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+  }
+
+  /* Button Spinner */
+  .btn-spinner {
+    margin-left: 0.5rem;
+    animation: spin 1s linear infinite;
+  }
+
+  .btn-spinner.hidden {
+    display: none;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
 </style>
+
+<script>
+  import { supabase } from "../lib/supabase";
+  import { updateUserProfile } from "../lib/identity";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("profile-form") as HTMLFormElement;
+    const updateBtn = document.getElementById("update-btn") as HTMLButtonElement;
+    const btnText = document.getElementById("btn-text") as HTMLElement;
+    const btnSpinner = document.getElementById("btn-spinner") as HTMLElement;
+    const statusMessage = document.getElementById("status-message") as HTMLElement;
+    const firstNameInput = document.getElementById("first_name") as HTMLInputElement;
+    const lastNameInput = document.getElementById("last_name") as HTMLInputElement;
+
+    if (!form || !updateBtn || !btnText || !btnSpinner || !statusMessage) {
+      return;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!firstNameInput || !lastNameInput) {
+        return;
+      }
+
+      // Get form values
+      const firstName = firstNameInput.value.trim() || null;
+      const lastName = lastNameInput.value.trim() || null;
+
+      // Show loading state
+      updateBtn.disabled = true;
+      btnText.textContent = "Aktualizuję...";
+      btnSpinner.classList.remove("hidden");
+      statusMessage.classList.add("hidden");
+
+      try {
+        // Update profile using the identity service
+        await updateUserProfile(supabase, {
+          firstName: firstName,
+          lastName: lastName,
+        });
+
+        // Show success message
+        statusMessage.textContent = "Profil został zaktualizowany!";
+        statusMessage.className = "status-message status-success";
+        statusMessage.classList.remove("hidden");
+
+        // Check if this is the first time saving a name
+        const isFirstTimeNameSave = !firstNameInput.defaultValue && firstName;
+
+        // Redirect after a short delay to show the success message
+        setTimeout(() => {
+          if (isFirstTimeNameSave) {
+            window.location.href = "/dashboard?welcome=true";
+          } else {
+            window.location.href = "/dashboard";
+          }
+        }, 1000);
+
+      } catch (error) {
+
+        // Show error message
+        const errorMessage = error instanceof Error ? error.message : "Wystąpił błąd podczas aktualizacji profilu. Spróbuj ponownie.";
+        statusMessage.textContent = errorMessage;
+        statusMessage.className = "status-message status-error";
+        statusMessage.classList.remove("hidden");
+
+        // Reset loading state
+        updateBtn.disabled = false;
+        btnText.textContent = "Zaktualizuj profil";
+        btnSpinner.classList.add("hidden");
+      }
+    });
+  });
+
+  // Delete meditation log function
+  window.deleteMeditationLog = async function(button: HTMLElement) {
+    const logId = button.getAttribute("data-log-id");
+
+    if (!logId) {
+      return;
+    }
+
+    // Confirm deletion
+    if (!confirm("Czy na pewno chcesz usunąć ten wpis?")) {
+      return;
+    }
+
+    try {
+      // Delete from Supabase
+      const { error } = await supabase.from("meditation_logs").delete().eq("id", logId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Remove the log entry from the DOM
+      const logEntry = button.closest(".log-entry");
+      if (logEntry) {
+        logEntry.remove();
+      }
+
+      // Refresh the page to update stats
+      window.location.reload();
+
+    } catch {
+      alert("Wystąpił błąd podczas usuwania wpisu. Spróbuj ponownie.");
+    }
+  };
+</script>
