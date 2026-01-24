@@ -36,6 +36,19 @@ if (Astro.request.method === "POST") {
     <meta name="generator" content={Astro.generator} />
     <title>VERANIMA - Login</title>
 
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="VERANIMA - Login" />
+    <meta property="og:description" content="Twoja cyfrowa świątynia. Uwolnij umysł i odnajdź spokój." />
+    <meta property="og:image" content={new URL("/og_logo.png", Astro.url.origin).href} />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="VERANIMA - Login" />
+    <meta name="twitter:description" content="Twoja cyfrowa świątynia. Uwolnij umysł i odnajdź spokój." />
+    <meta name="twitter:image" content={new URL("/og_logo.png", Astro.url.origin).href} />
+
     <!-- Font: Outfit (Nowoczesny, czysty) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
