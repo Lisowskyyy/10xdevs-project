@@ -30,7 +30,7 @@ if (session) {
   >
     <div class="absolute inset-0 z-0">
       <div
-        class="absolute inset-0"
+        class="absolute inset-0 animate-breathing"
         style="background-image: url('/veranima_background.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"
       >
       </div>
@@ -76,7 +76,7 @@ if (session) {
     </div>
     <div class="absolute inset-0 z-0 bg-slate-950/70"></div>
 
-    <div class="relative z-10 max-w-lg ml-16">
+    <div class="relative z-10 max-w-lg mx-auto text-center mt-8">
       <h2
         class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-200 to-indigo-300 mb-6"
       >
@@ -122,7 +122,7 @@ if (session) {
     </div>
     <div class="absolute inset-0 z-0 bg-slate-950/70"></div>
 
-    <div class="relative z-10 max-w-md text-center mx-auto">
+    <div class="relative z-10 max-w-md text-center mx-auto mt-8">
       <h2
         class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-cyan-300 mb-6"
       >
@@ -246,6 +246,19 @@ if (session) {
   }
   .animate-floating-circles {
     animation: floatingCircles 8s ease-in-out infinite;
+  }
+
+  /* Breathing animation for background */
+  @keyframes breathing {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  .animate-breathing {
+    animation: breathing 6s ease-in-out infinite;
   }
 
   /* Responsive adjustments */
