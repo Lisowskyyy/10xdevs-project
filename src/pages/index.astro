@@ -57,7 +57,7 @@ if (session) {
     <!-- Scroll Indicator -->
     <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
       <div class="flex flex-col items-center gap-2 text-gray-400">
-        <span class="text-sm font-light">Scroll to explore</span>
+        <span class="text-sm font-light">Przewiń w dół</span>
         <span class="text-2xl">↓</span>
       </div>
     </div>
@@ -88,20 +88,19 @@ if (session) {
   <!-- Dracarys Section -->
   <section
     id="dracarys"
-    class="h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
+    class="h-screen flex items-center px-4 relative overflow-hidden snap-start"
   >
-    <div class="absolute inset-0 z-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"></div>
+    <div class="absolute inset-0 z-0" style="background-image: url('/dracarys.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+    <div class="absolute inset-0 z-0 bg-slate-950/60"></div>
 
-
-    <div class="relative z-10 max-w-3xl">
-      <div class="text-8xl mb-8 dragon-icon">🐉</div>
+    <div class="relative z-10 flex-1 ml-auto max-w-md mr-16">
       <h2
         class="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 to-red-400 mb-6"
       >
-        Dracarys Mode
+        Dracarys
       </h2>
       <p class="text-xl md:text-2xl text-gray-200 mb-8 font-light leading-relaxed">
-        Wizualne spalanie negatywnych myśli i lęków.
+        Spal negatywne myśli i lęki.
         <br />
         Uwolnij się od tego, co Cię ogranicza.
       </p>
