@@ -154,7 +154,7 @@ const moodEmojiMap: Record<string, string> = {
       <h1 class="text-4xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-3">
         Twoja Statystyka
       </h1>
-      <p class="text-slate-400 italic text-lg">Track your liberation and growth</p>
+      <p class="text-slate-400 italic text-lg">Śledź swoją podróż oczyszczenia duszy</p>
     </section>
 
     <!-- Hero Stats - Grid of Glass Cards -->
@@ -165,7 +165,7 @@ const moodEmojiMap: Record<string, string> = {
         <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
           {totalEntries || 0}
         </div>
-        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Total Entries</div>
+        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Ilość wpisów</div>
       </div>
 
       <div
@@ -174,7 +174,7 @@ const moodEmojiMap: Record<string, string> = {
         <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
           {longestStreak}
         </div>
-        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Longest Streak</div>
+        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Najdłuższa passa</div>
       </div>
 
       <div
@@ -183,7 +183,7 @@ const moodEmojiMap: Record<string, string> = {
         <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
           {totalDays}
         </div>
-        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Total Days</div>
+        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Ilość dni</div>
       </div>
 
       <div
@@ -192,14 +192,14 @@ const moodEmojiMap: Record<string, string> = {
         <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
           {totalTransmutations || 0}
         </div>
-        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Transmutations</div>
+        <div class="text-xs text-amber-500/80 tracking-widest uppercase">Transmutacje</div>
       </div>
     </section>
 
     <!-- Current Stage -->
     <section class="mb-12">
       <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
-        🎭 Current Alchemical Stage
+        Aktualny Etap Alchemiczny
       </h2>
       <div
         class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-center"
@@ -218,7 +218,7 @@ const moodEmojiMap: Record<string, string> = {
               </div>
             </div>
             <span class="text-sm text-slate-500 whitespace-nowrap">
-              {(totalEntries || 0) % 30}/30 entries to next stage
+              {(totalEntries || 0) % 30}/30 wpisów do następnego etapu
             </span>
           </div>
         </div>
@@ -230,7 +230,7 @@ const moodEmojiMap: Record<string, string> = {
       class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 mb-12 shadow-lg shadow-purple-900/20"
     >
       <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
-        🔥 Streak Calendar (Last 90 Days)
+        Kalendarz Passy (Ostatnie 90 dni)
       </h2>
       <div class="grid grid-cols-13 gap-1 mb-4">
         {
@@ -258,12 +258,12 @@ const moodEmojiMap: Record<string, string> = {
         }
       </div>
       <div class="flex items-center justify-center gap-2 text-slate-400 text-sm">
-        <span>Less</span>
+        <span>Mniej</span>
         <div class="w-4 h-4 rounded bg-slate-800/30 border border-white/5"></div>
         <div class="w-4 h-4 rounded bg-purple-600/40 border border-white/5"></div>
         <div class="w-4 h-4 rounded bg-pink-600/60 border border-white/5"></div>
         <div class="w-4 h-4 rounded bg-amber-500/80 border border-white/5"></div>
-        <span>More</span>
+        <span>Więcej</span>
       </div>
     </section>
 
@@ -272,7 +272,7 @@ const moodEmojiMap: Record<string, string> = {
       class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 mb-12 shadow-lg shadow-purple-900/20"
     >
       <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
-        🎭 Mood Distribution (Last 30 Days)
+        Rozkład Nastrójów (Ostatnie 30 Dni)
       </h2>
       <div class="flex flex-col gap-6">
         {
@@ -300,7 +300,9 @@ const moodEmojiMap: Record<string, string> = {
               );
             })
           ) : (
-            <p class="text-center py-8 text-slate-500">No mood data for the last 30 days. Start journaling! 🌱</p>
+            <p class="text-center py-8 text-slate-500">
+              Brak danych o nastrojach z ostatnich 30 dni. Zacznij pisać w dzienniku!
+            </p>
           )
         }
       </div>
@@ -311,7 +313,7 @@ const moodEmojiMap: Record<string, string> = {
       class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 mb-12 shadow-lg shadow-purple-900/20"
     >
       <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
-        ⏳ Transformation Timeline
+        Linia Transformacji
       </h2>
       <div class="relative pl-8">
         <div class="absolute left-2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-purple-600 via-pink-600 to-amber-500">
@@ -345,7 +347,7 @@ const moodEmojiMap: Record<string, string> = {
                 );
               })
           ) : (
-            <p class="text-center py-8 text-slate-500">Your journey begins here. Write your first entry! 🌱</p>
+            <p class="text-center py-8 text-slate-500">Twoja podróż zaczyna się tutaj. Zapisz swoją pierwszą myśl!</p>
           )
         }
       </div>
@@ -356,7 +358,7 @@ const moodEmojiMap: Record<string, string> = {
       class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 shadow-lg shadow-purple-900/20"
     >
       <h2 class="text-2xl font-serif text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500 mb-6">
-        📈 This Month's Overview
+        Przegląd Miesiąca
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div
@@ -365,7 +367,7 @@ const moodEmojiMap: Record<string, string> = {
           <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
             {monthEntries?.length || 0}
           </div>
-          <div class="text-xs text-amber-500/80 tracking-widest uppercase">Entries This Month</div>
+          <div class="text-xs text-amber-500/80 tracking-widest uppercase">Wpisy W Tym Miesiącu</div>
         </div>
         <div
           class="bg-slate-900/50 backdrop-blur-md border border-white/5 rounded-2xl p-6 text-center transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-900/20"
@@ -373,7 +375,7 @@ const moodEmojiMap: Record<string, string> = {
           <div class="text-5xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] mb-2">
             {(monthEntries?.length || 0) >= 20 ? "✅" : "⏳"}
           </div>
-          <div class="text-xs text-amber-500/80 tracking-widest uppercase">Monthly Goal (20)</div>
+          <div class="text-xs text-amber-500/80 tracking-widest uppercase">Miesięczny Cel (20)</div>
         </div>
       </div>
     </section>
