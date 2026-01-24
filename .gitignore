@@ -27,3 +27,9 @@ pnpm-debug.log*
 .env
 .env.example
 .vercel
+
+# supabase
+supabase/migrations/
+
+# run-migration.js
+run-migration.jsrun-migration.js
