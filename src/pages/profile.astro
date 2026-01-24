@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { createServerSupabaseClient } from "../lib/supabase";
+import { updateUserProfile } from "../lib/identity";
 
 const supabase = createServerSupabaseClient(Astro.cookies);
 const {
@@ -28,13 +29,11 @@ if (Astro.request.method === "POST") {
 
     const isFirstTimeNameSave = !existingProfile?.first_name && firstName;
 
-    await supabase
-      .from("profiles")
-      .update({
-        first_name: firstName,
-        last_name: lastName,
-      })
-      .eq("id", user.id);
+    // Use the centralized identity service to update profile
+    await updateUserProfile(supabase, {
+      firstName: firstName,
+      lastName: lastName,
+    });
 
     // Redirect to prevent form resubmission
     // If this is the first time saving a name, redirect to dashboard with welcome flag

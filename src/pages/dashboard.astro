@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import GratitudeJournal from "../components/GratitudeJournal.astro";
 import { createServerSupabaseClient } from "../lib/supabase";
+import { getUserProfile } from "../lib/identity";
 
 const supabase = createServerSupabaseClient(Astro.cookies);
 
@@ -15,20 +16,15 @@ if (!session || sessionError) {
   return Astro.redirect("/login");
 }
 
-// Fetch user profile data
-const { data: profile, error: profileError } = await supabase
-  .from("profiles")
-  .select("*")
-  .eq("id", session.user.id)
-  .single();
+// Fetch user profile data using the identity service
+const userProfile = await getUserProfile(supabase);
 
-if (profileError) {
-  // Handle profile error gracefully
-  // Could redirect to error page or show default values
+if (!userProfile) {
+  return Astro.redirect("/login");
 }
 
 // Get user's first name for greeting
-const firstName = profile?.first_name || "Podróżniku";
+const firstName = userProfile.firstName || "Podróżniku";
 
 // Check if this is a new user's first visit (via welcome parameter)
 const isNewUser = Astro.url.searchParams.get("welcome") === "true";
@@ -44,7 +40,7 @@ const stageInfo: Record<string, { name: string; color: string; emoji: string }> 
   rubedo: { name: "Rubedo", color: "from-red-500 to-rose-700", emoji: "🔥" },
 };
 
-const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo.nigredo;
+const currentStage = stageInfo[userProfile.currentStage] || stageInfo.nigredo;
 ---
 
 <Layout title="Dashboard - VERANIMA">
@@ -76,7 +72,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
           <div class="stat-icon">🔥</div>
           <div class="stat-content">
             <p class="stat-label">Aktualna passa</p>
-            <p class="stat-value">{profile?.streak_days || 0} days</p>
+            <p class="stat-value">{userProfile.streakDays} days</p>
           </div>
         </div>
 
@@ -84,7 +80,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
           <div class="stat-icon">📝</div>
           <div class="stat-content">
             <p class="stat-label">Ilość wpisów</p>
-            <p class="stat-value">{profile?.total_entries || 0}</p>
+            <p class="stat-value">{userProfile.totalEntries}</p>
           </div>
         </div>
 
@@ -100,7 +96,7 @@ const currentStage = stageInfo[profile?.current_stage || "nigredo"] || stageInfo
           <div class="stat-icon">🌍</div>
           <div class="stat-content">
             <p class="stat-label">Kręgi medytacyjne</p>
-            <p class="stat-value">{profile?.total_circles || 0}</p>
+            <p class="stat-value">{userProfile.totalCircles}</p>
           </div>
         </div>
 
