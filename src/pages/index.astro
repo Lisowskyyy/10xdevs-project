@@ -29,7 +29,7 @@ if (session) {
     class="min-h-screen flex flex-col items-center justify-center text-center px-4 relative overflow-hidden snap-start"
   >
     <div class="absolute inset-0 z-0">
-      <div class="bg-[url('/veranima_background.png')] bg-cover bg-center bg-no-repeat absolute inset-0"></div>
+      <div class="absolute inset-0" style="background-image: url('/veranima_background.png'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
       <div class="bg-slate-950/70 absolute inset-0"></div>
     </div>
 
@@ -92,14 +92,6 @@ if (session) {
   >
     <div class="absolute inset-0 z-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"></div>
 
-    <!-- Fire Effect -->
-    <div class="absolute bottom-0 left-0 right-0 h-32 z-0 fire-container">
-      <div class="fire"></div>
-      <div class="fire"></div>
-      <div class="fire"></div>
-      <div class="fire"></div>
-      <div class="fire"></div>
-    </div>
 
     <div class="relative z-10 max-w-3xl">
       <div class="text-8xl mb-8 dragon-icon">🐉</div>
@@ -231,79 +223,6 @@ if (session) {
     transform: scale(1.1);
   }
 
-  /* Fire Effect */
-  .fire-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
-    height: 120px;
-  }
-
-  .fire {
-    width: 60px;
-    height: 100%;
-    background: linear-gradient(
-      to top,
-      rgba(251, 146, 60, 0.8) 0%,
-      rgba(239, 68, 68, 0.6) 30%,
-      rgba(220, 38, 38, 0.4) 60%,
-      transparent 100%
-    );
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    position: relative;
-    animation: flicker 2s infinite ease-in-out;
-    filter: blur(2px);
-  }
-
-  .fire:nth-child(1) {
-    animation-delay: 0s;
-    width: 50px;
-    height: 80px;
-  }
-
-  .fire:nth-child(2) {
-    animation-delay: 0.4s;
-    width: 70px;
-    height: 100px;
-  }
-
-  .fire:nth-child(3) {
-    animation-delay: 0.2s;
-    width: 60px;
-    height: 90px;
-  }
-
-  .fire:nth-child(4) {
-    animation-delay: 0.6s;
-    width: 65px;
-    height: 95px;
-  }
-
-  .fire:nth-child(5) {
-    animation-delay: 0.3s;
-    width: 55px;
-    height: 85px;
-  }
-
-  @keyframes flicker {
-    0%,
-    100% {
-      transform: scaleY(1) scaleX(1);
-      opacity: 0.8;
-    }
-    25% {
-      transform: scaleY(1.1) scaleX(0.95);
-      opacity: 0.9;
-    }
-    50% {
-      transform: scaleY(0.95) scaleX(1.05);
-      opacity: 0.85;
-    }
-    75% {
-      transform: scaleY(1.05) scaleX(0.98);
-      opacity: 0.9;
-    }
-  }
 
   /* Responsive adjustments */
   @media (max-width: 768px) {

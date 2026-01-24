@@ -122,16 +122,6 @@ const { data: burnedEntries } = await supabase
             </button>
           </form>
 
-          <!-- Fire Animation Container -->
-          <div class="fire-container" id="fireContainer">
-            <div class="fire">
-              <div class="flame"></div>
-              <div class="flame"></div>
-              <div class="flame"></div>
-              <div class="flame"></div>
-              <div class="flame"></div>
-            </div>
-          </div>
         </section>
       </div>
 
@@ -219,7 +209,8 @@ const { data: burnedEntries } = await supabase
 
   .dracarys-main {
     max-width: 900px;
-    margin: 0 auto;
+    margin: 0 auto 0 0;
+    margin-right: 15%;
     padding: 3rem 2rem;
   }
 
@@ -348,89 +339,6 @@ const { data: burnedEntries } = await supabase
     transform: scale(0.98);
   }
 
-  /* Fire Animation */
-  .fire-container {
-    position: fixed;
-    bottom: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s;
-    z-index: 1000;
-  }
-
-  .fire-container.active {
-    opacity: 1;
-    animation: rise 2s ease-out;
-  }
-
-  @keyframes rise {
-    0% {
-      bottom: -100px;
-    }
-    50% {
-      bottom: 50%;
-    }
-    100% {
-      bottom: -100px;
-    }
-  }
-
-  .fire {
-    position: relative;
-    width: 200px;
-    height: 200px;
-  }
-
-  .flame {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 50px;
-    height: 80px;
-    background: linear-gradient(to top, #f7931e 0%, #ff6b35 50%, transparent 100%);
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    transform: translateX(-50%);
-    animation: flicker 0.5s ease-in-out infinite alternate;
-  }
-
-  .flame:nth-child(2) {
-    width: 60px;
-    height: 100px;
-    animation-delay: 0.1s;
-    left: 40%;
-  }
-
-  .flame:nth-child(3) {
-    width: 55px;
-    height: 90px;
-    animation-delay: 0.2s;
-    left: 60%;
-  }
-
-  .flame:nth-child(4) {
-    width: 45px;
-    height: 70px;
-    animation-delay: 0.3s;
-    left: 35%;
-  }
-
-  .flame:nth-child(5) {
-    width: 48px;
-    height: 75px;
-    animation-delay: 0.4s;
-    left: 65%;
-  }
-
-  @keyframes flicker {
-    0% {
-      transform: translateX(-50%) scaleY(1) scaleX(1);
-    }
-    100% {
-      transform: translateX(-50%) scaleY(1.1) scaleX(0.9);
-    }
-  }
 
   .burned-section {
     backdrop-filter: blur(12px);
@@ -521,7 +429,6 @@ const { data: burnedEntries } = await supabase
     const form = document.getElementById("burnForm");
     const textarea = document.getElementById("content");
     const charCount = document.getElementById("char-count");
-    const fireContainer = document.getElementById("fireContainer");
 
     // Licznik znaków
     if (textarea && charCount) {
@@ -534,16 +441,6 @@ const { data: burnedEntries } = await supabase
         } else {
           charCount.classList.remove("text-red-500");
         }
-      });
-    }
-
-    // Fire animation on submit
-    if (form && fireContainer) {
-      form.addEventListener("submit", () => {
-        fireContainer.classList.add("active");
-        setTimeout(() => {
-          fireContainer.classList.remove("active");
-        }, 2000);
       });
     }
   });
