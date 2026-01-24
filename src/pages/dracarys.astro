@@ -57,9 +57,12 @@ const { data: burnedEntries } = await supabase
 ---
 
 <Layout title="Dracarys - VERANIMA">
-  <div class="min-h-screen bg-[url('/dracarys.png')] bg-cover bg-no-repeat bg-[center_top] relative text-white">
+  <div
+    class="min-h-screen bg-cover bg-no-repeat bg-[center_top] relative text-white"
+    style="background-image: url('/dracarys.png');"
+  >
     <!-- Background Overlay -->
-    <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/60 to-slate-950/90 z-0"></div>
+    <div class="absolute inset-0 bg-slate-950/80 z-0"></div>
 
     <!-- Header -->
     <header class="dracarys-header relative z-10">
