@@ -62,7 +62,7 @@ export const DELETE: APIRoute = async ({ cookies }) => {
   }
 
   const headers = new Headers({
-    Location: "/",
+    Location: "https://veranima.pl/",
   });
   headers.append(
     "Set-Cookie",

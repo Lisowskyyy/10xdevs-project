@@ -796,7 +796,7 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
             document.cookie = "supabase-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             localStorage.clear();
             sessionStorage.clear();
-            window.location.replace("/");
+            window.location.replace("https://veranima.pl/");
             return;
           }
           const data = await response.json().catch(() => ({}));
