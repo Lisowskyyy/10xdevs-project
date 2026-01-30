@@ -791,6 +791,8 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
           const isRedirect = response.status === 302 || response.status === 303;
           const isSuccess = response.status === 200;
           if (isOpaqueRedirect || isRedirect || isSuccess) {
+            const { supabase } = await import("../lib/supabase");
+            await supabase.auth.signOut();
             window.location.href = "/";
             return;
           }
