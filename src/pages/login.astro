@@ -236,7 +236,25 @@ import "../styles/global.css";
       return;
     }
 
-    if (data?.user) {
+    if (data?.session) {
+      // Sync session to server cookies so middleware/dashboard can read it
+      const callbackRes = await fetch("/api/auth/callback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        }),
+      });
+
+      if (!callbackRes.ok) {
+        if (errorBox) {
+          errorBox.textContent = "Nie udało się utworzyć sesji. Spróbuj ponownie.";
+          errorBox.classList.remove("hidden");
+        }
+        return;
+      }
+
       window.location.href = "/dashboard";
     }
   });
