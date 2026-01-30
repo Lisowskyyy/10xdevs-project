@@ -185,6 +185,13 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
             )
           }
         </div>
+
+        <!-- Danger Zone -->
+        <div class="danger-zone">
+          <h2 class="danger-zone-title">Strefa zagrożenia</h2>
+          <p class="danger-zone-desc">Te działania są nieodwracalne.</p>
+          <button type="button" id="delete-account-btn" class="btn-delete-account">Usuń konto</button>
+        </div>
       </div>
     </main>
   </div>
@@ -590,6 +597,48 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
     font-size: 1rem;
   }
 
+  /* Danger Zone */
+  .danger-zone {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(185, 28, 28, 0.3);
+    border-radius: 0.75rem;
+    background: rgba(185, 28, 28, 0.05);
+    padding: 1.5rem 2rem;
+  }
+
+  .danger-zone-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: rgb(248, 113, 113);
+    margin-bottom: 0.25rem;
+  }
+
+  .danger-zone-desc {
+    font-size: 0.875rem;
+    color: rgba(148, 163, 184, 0.8);
+    margin-bottom: 1rem;
+  }
+
+  .btn-delete-account {
+    width: 100%;
+    padding: 0.875rem 2rem;
+    background: rgba(185, 28, 28, 0.2);
+    border: 1px solid rgb(185, 28, 28);
+    border-radius: 0.5rem;
+    color: rgb(248, 113, 113);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-delete-account:hover {
+    background: rgba(185, 28, 28, 0.35);
+    border-color: rgb(220, 38, 38);
+    color: white;
+  }
+
   /* Responsive Design */
   @media (max-width: 768px) {
     .profile-main {
@@ -692,111 +741,83 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
     const firstNameInput = document.getElementById("first_name") as HTMLInputElement;
     const lastNameInput = document.getElementById("last_name") as HTMLInputElement;
 
-    if (!form || !updateBtn || !btnText || !btnSpinner || !statusMessage) {
-      return;
-    }
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      if (!firstNameInput || !lastNameInput) {
-        return;
-      }
-
-      // Get form values
-      const firstName = firstNameInput.value.trim() || null;
-      const lastName = lastNameInput.value.trim() || null;
-
-      // Show loading state
-      updateBtn.disabled = true;
-      btnText.textContent = "Aktualizuję...";
-      btnSpinner.classList.remove("hidden");
-      statusMessage.classList.add("hidden");
-
-      try {
-        // Update profile via API endpoint (server-side handles session)
-        const response = await fetch("/api/profile", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            firstName: firstName,
-            lastName: lastName,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Failed to update profile");
+    if (form && updateBtn && btnText && btnSpinner && statusMessage && firstNameInput && lastNameInput) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const firstName = firstNameInput.value.trim() || null;
+        const lastName = lastNameInput.value.trim() || null;
+        updateBtn.disabled = true;
+        btnText.textContent = "Aktualizuję...";
+        btnSpinner.classList.remove("hidden");
+        statusMessage.classList.add("hidden");
+        try {
+          const response = await fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ firstName, lastName }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Failed to update profile");
+          statusMessage.textContent = "Profil został zaktualizowany!";
+          statusMessage.className = "status-message status-success";
+          statusMessage.classList.remove("hidden");
+          const isFirstTimeNameSave = !firstNameInput.defaultValue && firstName;
+          setTimeout(() => {
+            window.location.href = isFirstTimeNameSave ? "/dashboard?welcome=true" : "/dashboard";
+          }, 1000);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Wystąpił błąd podczas aktualizacji profilu. Spróbuj ponownie.";
+          statusMessage.textContent = errorMessage;
+          statusMessage.className = "status-message status-error";
+          statusMessage.classList.remove("hidden");
+          updateBtn.disabled = false;
+          btnText.textContent = "Zaktualizuj profil";
+          btnSpinner.classList.add("hidden");
         }
+      });
+    }
 
-        // Show success message
-        statusMessage.textContent = "Profil został zaktualizowany!";
-        statusMessage.className = "status-message status-success";
-        statusMessage.classList.remove("hidden");
-
-        // Check if this is the first time saving a name
-        const isFirstTimeNameSave = !firstNameInput.defaultValue && firstName;
-
-        // Redirect after a short delay to show the success message
-        setTimeout(() => {
-          if (isFirstTimeNameSave) {
-            window.location.href = "/dashboard?welcome=true";
-          } else {
-            window.location.href = "/dashboard";
+    const deleteAccountBtn = document.getElementById("delete-account-btn");
+    if (deleteAccountBtn) {
+      deleteAccountBtn.addEventListener("click", async () => {
+        if (!confirm("Czy na pewno? To operacja nieodwracalna.")) return;
+        try {
+          const response = await fetch("/api/auth/delete-account", {
+            method: "DELETE",
+            redirect: "manual",
+          });
+          if (response.status === 302) {
+            window.location.href = response.headers.get("Location") || "/";
+            return;
           }
-        }, 1000);
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || "Nie udało się usunąć konta.");
+          }
+          window.location.href = "/";
+        } catch (err) {
+          alert(err instanceof Error ? err.message : "Wystąpił błąd. Spróbuj ponownie.");
+        }
+      });
+    }
 
-      } catch (error) {
-
-        // Show error message
-        const errorMessage = error instanceof Error ? error.message : "Wystąpił błąd podczas aktualizacji profilu. Spróbuj ponownie.";
-        statusMessage.textContent = errorMessage;
-        statusMessage.className = "status-message status-error";
-        statusMessage.classList.remove("hidden");
-
-        // Reset loading state
-        updateBtn.disabled = false;
-        btnText.textContent = "Zaktualizuj profil";
-        btnSpinner.classList.add("hidden");
+    window.deleteMeditationLog = async function (button: HTMLElement) {
+      const logId = button.getAttribute("data-log-id");
+      if (!logId) return;
+      if (!confirm("Czy na pewno chcesz usunąć ten wpis?")) return;
+      try {
+        const response = await fetch(`/api/meditation-logs/${logId}`, { method: "DELETE" });
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || "Błąd podczas usuwania");
+        }
+        const logEntry = button.closest(".log-item");
+        if (logEntry) logEntry.remove();
+        window.location.reload();
+      } catch {
+        alert("Wystąpił błąd podczas usuwania wpisu. Spróbuj ponownie.");
       }
-    });
+    };
   });
-
-  // Delete meditation log function
-  window.deleteMeditationLog = async function(button: HTMLElement) {
-    const logId = button.getAttribute("data-log-id");
-
-    if (!logId) {
-      return;
-    }
-
-    // Confirm deletion
-    if (!confirm("Czy na pewno chcesz usunąć ten wpis?")) {
-      return;
-    }
-
-    try {
-      // Delete from Supabase
-      const { error } = await supabase.from("meditation_logs").delete().eq("id", logId);
-
-      if (error) {
-        throw error;
-      }
-
-      // Remove the log entry from the DOM
-      const logEntry = button.closest(".log-entry");
-      if (logEntry) {
-        logEntry.remove();
-      }
-
-      // Refresh the page to update stats
-      window.location.reload();
-
-    } catch {
-      alert("Wystąpił błąd podczas usuwania wpisu. Spróbuj ponownie.");
-    }
-  };
 </script>

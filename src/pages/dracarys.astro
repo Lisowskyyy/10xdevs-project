@@ -58,7 +58,7 @@ const { data: burnedEntries } = await supabase
 
 <Layout title="Dracarys - VERANIMA">
   <div
-    class="min-h-screen bg-cover bg-no-repeat bg-[center_top] relative text-white"
+    class="min-h-screen bg-cover bg-no-repeat bg-center relative text-white"
     style="background-image: url('/dracarys.png');"
   >
     <!-- Background Overlay -->
@@ -72,9 +72,9 @@ const { data: burnedEntries } = await supabase
       </div>
     </header>
 
-    <main class="dracarys-main relative z-10">
+    <main class="dracarys-main relative z-10 flex flex-col items-center justify-center min-h-[80vh] w-full px-4 py-8">
       <!-- Main Ritual Card -->
-      <div class="ritual-card">
+      <div class="ritual-card w-full max-w-2xl">
         <!-- Intro -->
         <section class="intro-section">
           <h2>Spal to, co Cię ogranicza</h2>
@@ -126,7 +126,7 @@ const { data: burnedEntries } = await supabase
       </div>
 
       <!-- Spalone wpisy -->
-      <section class="burned-section">
+      <section class="burned-section w-full max-w-2xl mt-6">
         <h2>Transmutowane</h2>
         {
           burnedEntries && burnedEntries.length > 0 ? (
@@ -208,10 +208,7 @@ const { data: burnedEntries } = await supabase
   }
 
   .dracarys-main {
-    max-width: 900px;
-    margin: 0 auto 0 0;
-    margin-right: 15%;
-    padding: 3rem 2rem;
+    box-sizing: border-box;
   }
 
   .ritual-card {

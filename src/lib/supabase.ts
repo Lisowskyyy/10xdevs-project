@@ -12,6 +12,23 @@ if (import.meta.env.PROD && (!import.meta.env.PUBLIC_SUPABASE_URL || !import.met
 // Client-side Supabase client (for forms, etc.)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+/**
+ * Server-side only. Supabase client with service role key (bypasses RLS).
+ * Use for admin operations e.g. deleting a user. Never expose to client.
+ */
+export function getSupabaseAdmin() {
+  const serviceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
+  }
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
 // Server-side Supabase client with cookies (for SSR)
 export function createServerSupabaseClient(cookies: AstroCookies) {
   return createClient(supabaseUrl, supabaseAnonKey, {
