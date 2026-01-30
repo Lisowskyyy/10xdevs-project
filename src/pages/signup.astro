@@ -7,39 +7,39 @@ const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 ---
 
-<Layout title="Sign Up | VERANIMA" showNav={false}>
+<Layout title="Dołącz do Kręgu | VERANIMA" showNav={false}>
   <div class="signup-container">
     <div class="signup-card">
       <h1 class="logo">VERANIMA</h1>
-      <p class="tagline">Begin your liberation journey.</p>
+      <p class="tagline">Rozpocznij swoją drogę wyzwolenia.</p>
 
       <form id="signupForm" class="signup-form" data-supabase-url={supabaseUrl} data-supabase-key={supabaseAnonKey}>
         <div class="input-group">
-          <label for="display_name">Display Name (optional)</label>
-          <input type="text" id="display_name" name="display_name" placeholder="Your name" />
+          <label for="display_name">Nazwa wyświetlana (opcjonalnie)</label>
+          <input type="text" id="display_name" name="display_name" placeholder="Twoje imię" aria-label="Nazwa wyświetlana (opcjonalnie)" />
         </div>
 
         <div class="input-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="your@email.com" required />
+          <label for="email">Adres Email</label>
+          <input type="email" id="email" name="email" placeholder="np. twoj@email.com" required aria-label="Adres Email" />
         </div>
 
         <div class="input-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="••••••••" required />
+          <label for="password">Hasło</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required aria-label="Hasło" />
         </div>
 
         <div class="input-group">
-          <label for="confirm-password">Confirm Password</label>
-          <input type="password" id="confirm-password" name="confirm-password" placeholder="••••••••" required />
+          <label for="confirm-password">Potwierdź hasło</label>
+          <input type="password" id="confirm-password" name="confirm-password" placeholder="••••••••" required aria-label="Potwierdź hasło" />
         </div>
 
         <div id="error-message" style="display: none;"></div>
 
-        <button type="submit" class="btn-primary">Create Account</button>
+        <button type="submit" class="btn-primary">Zarejestruj</button>
 
         <p class="login-link">
-          Already have an account? <a href="/login">Sign in</a>
+          Masz już konto? <a href="/login">Zaloguj się</a>
         </p>
       </form>
     </div>
@@ -197,7 +197,7 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       }
       if (submitButton && isHTMLButtonElement(submitButton)) {
         submitButton.disabled = true;
-        submitButton.innerText = "Creating Account...";
+        submitButton.innerText = "Tworzenie konta...";
         submitButton.style.opacity = "0.5";
         submitButton.style.cursor = "not-allowed";
       }
@@ -209,13 +209,13 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
       const displayName = formData.get("display_name")?.toString();
 
       if (!email || !password || !confirmPassword) {
-        showError("All fields are required.");
+        showError("Wypełnij wszystkie wymagane pola.");
         resetButton();
         return;
       }
 
       if (password !== confirmPassword) {
-        showError("Passwords do not match.");
+        showError("Hasła nie są zgodne.");
         resetButton();
         return;
       }
@@ -238,7 +238,7 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
       // Success - redirect to login
       if (submitButton && isHTMLButtonElement(submitButton)) {
-        submitButton.innerText = "Success! Redirecting...";
+        submitButton.innerText = "Sukces! Przekierowanie...";
         submitButton.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
       }
 
@@ -263,7 +263,7 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
   function resetButton() {
     if (submitButton && isHTMLButtonElement(submitButton)) {
       submitButton.disabled = false;
-      submitButton.innerText = "Create Account";
+      submitButton.innerText = "Zarejestruj";
       submitButton.style.opacity = "1";
       submitButton.style.cursor = "pointer";
       submitButton.style.background = "linear-gradient(135deg, #d4af37 0%, #f4e4c1 100%)";

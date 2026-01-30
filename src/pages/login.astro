@@ -10,10 +10,10 @@ import "../styles/global.css";
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="generator" content={Astro.generator} />
-    <title>VERANIMA - Login</title>
+    <title>VERANIMA - Zaloguj się</title>
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="VERANIMA - Login" />
+    <meta property="og:title" content="VERANIMA - Zaloguj się" />
     <meta property="og:description" content="Twoja cyfrowa świątynia. Uwolnij umysł i odnajdź spokój." />
     <meta property="og:image" content={new URL("/og_logo.png", Astro.url.origin).href} />
     <meta property="og:url" content={Astro.url.href} />
@@ -21,7 +21,7 @@ import "../styles/global.css";
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="VERANIMA - Login" />
+    <meta name="twitter:title" content="VERANIMA - Zaloguj się" />
     <meta name="twitter:description" content="Twoja cyfrowa świątynia. Uwolnij umysł i odnajdź spokój." />
     <meta name="twitter:image" content={new URL("/og_logo.png", Astro.url.origin).href} />
 
@@ -40,17 +40,17 @@ import "../styles/global.css";
     <div class="login-container">
       <div class="login-card">
         <h1 class="logo">VERANIMA</h1>
-        <p class="tagline">Breaker of Chains, your liberation begins.</p>
+        <p class="tagline">Łamacz kajdan – twoja droga do wyzwolenia.</p>
 
         <form method="POST" class="login-form">
           <div class="input-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="your@email.com" required />
+            <label for="email">Adres Email</label>
+            <input type="email" id="email" name="email" placeholder="np. twoj@email.com" required aria-label="Adres Email" />
           </div>
 
           <div class="input-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="••••••••" required />
+            <label for="password">Hasło</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" required aria-label="Hasło" />
           </div>
 
           <div id="error-message" class="error-message hidden" role="alert" aria-live="polite"></div>
@@ -58,7 +58,7 @@ import "../styles/global.css";
           <button type="submit" class="btn-primary">Zaloguj</button>
 
           <p class="signup-link">
-            Don't have an account? <a href="/signup">Create one</a>
+            Nie masz jeszcze konta? <a href="/signup">Stwórz konto</a>
           </p>
         </form>
       </div>
