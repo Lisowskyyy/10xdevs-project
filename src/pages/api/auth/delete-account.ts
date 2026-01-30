@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { createServerSupabaseClient, getSupabaseAdmin } from "../../../lib/supabase";
 
-export const DELETE: APIRoute = async ({ cookies, redirect }) => {
+export const DELETE: APIRoute = async ({ cookies }) => {
   const supabase = createServerSupabaseClient(cookies);
 
   const {
@@ -61,5 +61,16 @@ export const DELETE: APIRoute = async ({ cookies, redirect }) => {
     );
   }
 
-  return redirect("/");
+  const headers = new Headers({
+    Location: "/",
+  });
+  headers.append(
+    "Set-Cookie",
+    "sb-access-token=deleted; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax"
+  );
+  headers.append(
+    "Set-Cookie",
+    "sb-refresh-token=deleted; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax"
+  );
+  return new Response(null, { status: 302, headers });
 };
