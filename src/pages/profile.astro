@@ -791,9 +791,12 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
           const isRedirect = response.status === 302 || response.status === 303;
           const isSuccess = response.status === 200;
           if (isOpaqueRedirect || isRedirect || isSuccess) {
-            const { supabase } = await import("../lib/supabase");
-            await supabase.auth.signOut();
-            window.location.href = "/";
+            document.cookie = "sb-access-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "sb-refresh-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "supabase-auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.replace("/");
             return;
           }
           const data = await response.json().catch(() => ({}));
