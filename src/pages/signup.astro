@@ -224,8 +224,10 @@ const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
         email,
         password,
         options: {
-          data: { first_name: displayName || "" },
-        },
+          data: {
+            full_name: displayName || ""
+          }
+        }
       });
 
       if (error) {
