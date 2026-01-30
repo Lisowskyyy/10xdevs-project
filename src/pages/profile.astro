@@ -787,15 +787,15 @@ const totalMinutes = logs?.reduce((acc, log) => acc + (log.duration_minutes || 0
             method: "DELETE",
             redirect: "manual",
           });
-          if (response.status === 302) {
-            window.location.href = response.headers.get("Location") || "/";
+          const isOpaqueRedirect = response.type === "opaqueredirect" || response.status === 0;
+          const isRedirect = response.status === 302 || response.status === 303;
+          const isSuccess = response.status === 200;
+          if (isOpaqueRedirect || isRedirect || isSuccess) {
+            window.location.href = "/";
             return;
           }
-          if (!response.ok) {
-            const data = await response.json().catch(() => ({}));
-            throw new Error(data.error || "Nie udało się usunąć konta.");
-          }
-          window.location.href = "/";
+          const data = await response.json().catch(() => ({}));
+          alert(data?.error || "Nie udało się usunąć konta.");
         } catch (err) {
           alert(err instanceof Error ? err.message : "Wystąpił błąd. Spróbuj ponownie.");
         }
